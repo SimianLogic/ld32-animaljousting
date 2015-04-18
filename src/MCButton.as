@@ -2,6 +2,7 @@ package
 {
 	import flash.display.*;
 	import flash.events.*;
+	import flash.utils.getTimer;
 	
 	public class MCButton extends MovieClip
 	{
@@ -26,21 +27,31 @@ package
 			addEventListener(MouseEvent.MOUSE_UP, goDoSomething);
 		}
 		
+		public var isDown:Boolean = false;
+		
 		public function goBig(e:MouseEvent):void
 		{
+			if(isDown) return;
+			
 			mc.gotoAndStop("over");
+			
+			parent.setChildIndex(this, parent.numChildren-1);
 		}
 		public function goHome(e:MouseEvent):void
 		{
+			isDown = false;
 			mc.gotoAndStop("up");	
 		}
 		public function goDown(e:MouseEvent):void
 		{
+			isDown = true;
 			mc.gotoAndStop("down");	
 		}
 		public function goDoSomething(e:MouseEvent):void
 		{
-			mc.gotoAndStop("up");
+			isDown = false;
+			
+			mc.gotoAndStop("over");
 			dispatchEvent(new Event("mc_clicked"));
 		}
 		

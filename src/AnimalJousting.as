@@ -19,10 +19,9 @@ package
 			gameplay = new GameplayUI();
 			addChild(gameplay);
 			
-			
-			var card1:CardWeapon = new CardWeapon();
-			var card2:CardCharacter = new CardCharacter();
-			var card3:CardMount = new CardMount();
+			var card1:JoustCardCharacter = JoustCardCharacter.randomCharacter();
+			var card2:JoustCardWeapon = JoustCardWeapon.randomWeapon();
+			var card3:JoustCardMount = JoustCardMount.randomMount();
 			
 			gameplay.hand1.holder.addChild(card1);
 			gameplay.hand2.holder.addChild(card2);
