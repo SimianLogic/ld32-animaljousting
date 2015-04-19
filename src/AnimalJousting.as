@@ -32,6 +32,8 @@ package
 		
 		public static var STARTING_HAND_SIZE:int = 3;
 		
+		public var workingStack:Array = [null,null,null];
+		
 		public function AnimalJousting()
 		{
 			startingDeck = deck.concat(JoustCardWeapon.all, JoustCardMount.all, JoustCardCharacter.all, [JoustCardWeaponOrCharacter.Cactus, JoustCardWeaponOrCharacter.Pug, JoustCardMountCharacter.Horse, JoustCardWeaponOrMount.PogoStick]);
@@ -107,6 +109,17 @@ package
 		public function handleTrade(e:Event):void
 		{
 			//TODO: CHECK IF IT'S OUR TURN
+			
+			
+			for(var i:int = 0; i < workingStack.length; i++)
+			{
+				if(workingStack[i] != null)
+				{
+					return;
+				}
+			}
+			
+			
 			var discards:int = 0;
 			while(playerHands[1].length > 0)
 			{
@@ -216,9 +229,9 @@ package
 				return;
 			}
 			
-			if(!isDragging && Math.abs(lastDragX - mouseX) > 15 || Math.abs(lastDragY - mouseY) > 15)
+			if(!isDragging && (Math.abs(lastDragX - mouseX) > 15 || Math.abs(lastDragY - mouseY) > 15) )
 			{
-				trace("REALLY START DRAGGING");
+				trace("REALLY START DRAGGING " + isDragging);
 				isDragging = true;
 			}
 
@@ -250,15 +263,12 @@ package
 			var eligible:Array = [activeCard.hasMount, activeCard.hasCharacter, activeCard.hasWeapon];
 			var overlaps:Array = [mount_area, character_area, weapon_area];
 			
-			trace("ELIGIBLE: " + eligible);
-			trace("OVERLAPS: " + overlaps);
-			
 			var max_area:int = 0;
 			activeDrop = null;
 			for(var i:int = 0; i < 3; i++)
 			{
 				targets[i].gotoAndStop(1);
-				if(eligible[i] && overlaps[i] > max_area)
+				if(eligible[i] && workingStack[i] == null && overlaps[i] > max_area)
 				{
 					keeper = i;
 					max_area = overlaps[i];
@@ -267,7 +277,6 @@ package
 			
 			if(keeper >= 0)
 			{
-				trace("KEEPER: " + keeper);
 				targets[keeper].gotoAndStop(2);
 				activeDrop = targets[keeper];
 			}			
@@ -298,6 +307,25 @@ package
 				return;
 			}
 			
+			var stack_index:int = -1;
+			if(activeDrop == gameplay.dropMount){
+				stack_index = 0;
+			}else if(activeDrop == gameplay.dropCharacter){
+				stack_index = 1;
+			}else if(activeDrop == gameplay.dropWeapon){
+				stack_index = 2;
+			}
+			
+			workingStack[stack_index] = activeCard;
+			var card_index:int = -1;
+			for(var i:int = 0; i < playerHands[1].length; i++)
+			{
+				if(playerHands[1][i] == activeCard)
+				{
+					playerHands[1][i] = null;
+					card_index = i;
+				}
+			}
 			
 			//close in on our target!
 			Actuate.tween(activeCard, 0.25, { 
@@ -313,9 +341,15 @@ package
 			
 			setTimeout(function():void{
 				active_drop.gotoAndStop(1);
+				
 				active_card.addEventListener(MouseEvent.CLICK, function(event:Event):void
 				{
 					event.currentTarget.removeEventListener(event.type, arguments.callee);
+
+					workingStack[stack_index] = null;
+					playerHands[1][card_index] = active_card;
+					
+					updateLabels();
 					
 					Actuate.tween(active_card, 1, { 
 						x:active_hand.x,
@@ -349,6 +383,22 @@ package
 			
 		}
 		
+		public function updateLabels()
+		{
+			var handsize:int = 0;
+			for(var i:int = 0; i < playerHands[1].length; i++)
+			{
+				if(playerHands[1][i] != null)
+				{
+					handsize++;
+				}
+			}
+			
+			gameplay.handSize.text = handsize.toString();
+			gameplay.deckCount.text = "DECK: " + deck.length;
+			gameplay.discardCount.text = "DISCARD: " + discard.length;
+		}
+		
 		public function dealCardToPlayer():void
 		{
 			if(deck.length == 0)
@@ -365,15 +415,7 @@ package
 			var index:int = playerHands[1].length + 1;
 			playerHands[1].push(card);
 			
-			var handsize:int = 0;
-			for(var i:int = 0; i < playerHands[1].length; i++)
-			{
-				if(playerHands[1][i] != null)
-				{
-					handsize++;
-				}
-			}
-			gameplay.handSize.text = handsize.toString();
+			updateLabels();			
 			
 			var target_x:Number;
 			var target_y:Number;
