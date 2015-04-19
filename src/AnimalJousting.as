@@ -37,6 +37,9 @@ package
 		public var kingStack:Array = [null,null,null];
 		public var challengerStack:Array = [null,null,null]; 
 		
+		public var kingCardStack:Array = [null,null,null];
+		public var challengerCardStack:Array = [null,null,null];
+		
 		public function AnimalJousting()
 		{
 			startingDeck = deck.concat(JoustCardWeapon.all, JoustCardMount.all, JoustCardCharacter.all, [JoustCardWeaponOrCharacter.Cactus, JoustCardWeaponOrCharacter.Pug, JoustCardMountCharacter.Horse, JoustCardWeaponOrMount.PogoStick]);
@@ -101,6 +104,9 @@ package
 			
 			gameplay.jouster1.visible = false;
 			gameplay.jouster2.visible = false;
+			
+			setKing(null,null,null);
+			setChallenger(null,null,null);
 		}
 		
 		public function handleSubmit(e:Event):void
@@ -115,6 +121,13 @@ package
 					return;
 				}
 			}
+			
+			if(kingPlayerIndex == 0)
+			{
+				//TODO: give credit to the current player, not just meeeeee
+				kingPlayerIndex = 1;
+			}
+			
 		}
 		
 		public function handleTrade(e:Event):void
@@ -450,8 +463,9 @@ package
 			}
 		}
 		
-		public function setKing(mount:JoustCardBase, rider:JoustCardBase, weapon:JoustCardBase)
+		public function setKing(mount:JoustCardBase, rider:JoustCardBase, weapon:JoustCardBase):void
 		{
+			kingCardStack = [mount, rider, weapon];
 			for(var i:int = 0; i < 3; i++)
 			{
 				if(kingStack[i] != null)
@@ -466,6 +480,11 @@ package
 			var weapon_clip:MovieClip;
 			
 			var klass:Class;
+			
+			var power:int = 0;
+			var damageType:String = "";
+			var weakness:String = "";
+			var strength:String = "";
 						
 			if(mount != null)
 			{
@@ -477,6 +496,8 @@ package
 				mount_clip.y = gameplay.jouster1.y;
 				
 				kingStack[0] = mount_clip;
+				
+				power += mount.mountDamage;
 			}
 			
 			if(rider != null)
@@ -494,6 +515,8 @@ package
 				}
 				
 				kingStack[2] = rider_clip;
+				weakness = rider.characterWeakness;
+				strength = rider.characterStrength;
 			}
 			
 			if(weapon != null)
@@ -512,17 +535,144 @@ package
 				}
 				
 				kingStack[1] = weapon_clip;
+				
+				power += weapon.weaponDamage;
+				damageType = weapon.weaponDamageType;
 			}
 			
+			//CHECK OUR OPPONENT
+			if(challengerCardStack[1] != null)
+			{
+				if(challengerCardStack[2].weaponDamageType == weakness)
+				{
+					power -= 3;
+				}else if(challengerCardStack[2].weaponDamageType == strength){
+					power += 3;
+				}
+			}
+			
+			gameplay.stats1.damage.text = power;
+			gameplay.stats1.damageDistraction.visible = (damageType == JoustCardWeapon.DAMAGE_DISTRACTING);
+			gameplay.stats1.damagePoking.visible = (damageType == JoustCardWeapon.DAMAGE_POKING);
+			gameplay.stats1.damageFood.visible = (damageType == JoustCardWeapon.DAMAGE_FOOD);
+			
+			gameplay.stats1.weaknessDistraction.visible = (weakness == JoustCardWeapon.DAMAGE_DISTRACTING);
+			gameplay.stats1.weaknessPoking.visible = (weakness == JoustCardWeapon.DAMAGE_POKING);
+			gameplay.stats1.weaknessFood.visible = (weakness == JoustCardWeapon.DAMAGE_FOOD);
+			
+			gameplay.stats1.strengthDistraction.visible = (strength == JoustCardWeapon.DAMAGE_DISTRACTING);
+			gameplay.stats1.strengthPoking.visible = (strength == JoustCardWeapon.DAMAGE_POKING);
+			gameplay.stats1.strengthFood.visible = (strength == JoustCardWeapon.DAMAGE_FOOD);
 			
 		}
 		
-		public function setChallenger(mount:JoustCardBase, rider:JoustCardBase, weapon:JoustCardBase)
+		public function setChallenger(mount:JoustCardBase, rider:JoustCardBase, weapon:JoustCardBase):void
 		{
+			challengerCardStack = [mount, rider, weapon];
+			for(var i:int = 0; i < 3; i++)
+			{
+				if(challengerStack[i] != null)
+				{
+					challengerStack[i].parent.removeChild(challengerStack[i]);
+					challengerStack[i] = null;
+				}	
+			}
 			
+			var mount_clip:MovieClip;
+			var rider_clip:MovieClip;
+			var weapon_clip:MovieClip;
+			
+			var klass:Class;
+			
+			var power:int = 0;
+			var damageType:String = "";
+			var weakness:String = "";
+			var strength:String = "";
+			
+			if(mount != null)
+			{
+				klass = getDefinitionByName("MC_" + mount.cardName) as Class;
+				mount_clip = new klass() as MovieClip;
+				addChild(mount_clip);
+				
+				mount_clip.x = gameplay.jouster2.x;
+				mount_clip.y = gameplay.jouster2.y;
+				
+				mount_clip.scaleX = -1;
+				
+				challengerStack[0] = mount_clip;
+				
+				power += mount.mountDamage;
+			}
+			
+			if(rider != null)
+			{
+				klass = getDefinitionByName("MC_" + rider.cardName) as Class;
+				rider_clip = new klass() as MovieClip;
+				
+				if(mount_clip == null)
+				{
+					addChild(rider_clip);
+					rider_clip.x = gameplay.jouster2.x;
+					rider_clip.y = gameplay.jouster2.y;
+					rider_clip.scaleX = -1;
+				}else{
+					mount_clip["character"].addChild(rider_clip);
+				}
+				
+				challengerStack[2] = rider_clip;
+				weakness = rider.characterWeakness;
+				strength = rider.characterStrength;
+			}
+			
+			if(weapon != null)
+			{
+				klass = getDefinitionByName("MC_" + weapon.cardName) as Class;
+				weapon_clip = new klass() as MovieClip;
+				addChild(weapon_clip);
+				
+				if(mount_clip == null)
+				{
+					addChild(weapon_clip);
+					weapon_clip.x = gameplay.jouster2.x;
+					weapon_clip.y = gameplay.jouster2.y;
+					weapon_clip.scaleX = -1;
+				}else{
+					mount_clip["weapon"].addChild(weapon_clip);
+				}
+				
+				challengerStack[1] = weapon_clip;
+				
+				power += weapon.weaponDamage;
+				damageType = weapon.weaponDamageType;
+			}
+			
+			//CHECK OUR OPPONENT
+			if(kingCardStack[1] != null)
+			{
+				if(kingCardStack[2].weaponDamageType == weakness)
+				{
+					power -= 3;
+				}else if(kingCardStack[2].weaponDamageType == strength){
+					power += 3;
+				}
+			}
+			
+			gameplay.stats2.damage.text = power;
+			gameplay.stats2.damageDistraction.visible = (damageType == JoustCardWeapon.DAMAGE_DISTRACTING);
+			gameplay.stats2.damagePoking.visible = (damageType == JoustCardWeapon.DAMAGE_POKING);
+			gameplay.stats2.damageFood.visible = (damageType == JoustCardWeapon.DAMAGE_FOOD);
+			
+			gameplay.stats2.weaknessDistraction.visible = (weakness == JoustCardWeapon.DAMAGE_DISTRACTING);
+			gameplay.stats2.weaknessPoking.visible = (weakness == JoustCardWeapon.DAMAGE_POKING);
+			gameplay.stats2.weaknessFood.visible = (weakness == JoustCardWeapon.DAMAGE_FOOD);
+			
+			gameplay.stats2.strengthDistraction.visible = (strength == JoustCardWeapon.DAMAGE_DISTRACTING);
+			gameplay.stats2.strengthPoking.visible = (strength == JoustCardWeapon.DAMAGE_POKING);
+			gameplay.stats2.strengthFood.visible = (strength == JoustCardWeapon.DAMAGE_FOOD);
 		}
 		
-		public function updateLabels()
+		public function updateLabels():void
 		{
 			var handsize:int = 0;
 			for(var i:int = 0; i < playerHands[1].length; i++)
