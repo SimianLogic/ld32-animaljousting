@@ -11,9 +11,9 @@ package
 			new JoustCardWeapon("discoball", "Disco ball", 2, DAMAGE_DISTRACTING, 2),
 			
 			new JoustCardWeapon("chocolatefountain", "Chocolate Fountain", 4, DAMAGE_FOOD, 3),
-			new JoustCardWeapon("toasterLauncher", "Toaster Launcher", 3, DAMAGE_FOOD, 2),
+			new JoustCardWeapon("toasterLauncher", "Toaster Launcher", 3, DAMAGE_FOOD, 3),
 			new JoustCardWeapon("bananas", "Bananas", 1, DAMAGE_FOOD, 1),
-			new JoustCardWeapon("ham", "Ham", 2, DAMAGE_FOOD, 1),
+			new JoustCardWeapon("ham", "Ham", 2, DAMAGE_FOOD, 2),
 			
 			new JoustCardWeapon("cardboardtube", "Cardboard Tube", 1, DAMAGE_POKING, 1),
 			new JoustCardWeapon("mop", "Mop", 3, DAMAGE_POKING, 1),

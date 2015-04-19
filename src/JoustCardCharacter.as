@@ -8,17 +8,17 @@ package
 			new JoustCardCharacter("dog", "Dog", "food", "poking", 3, 2),
 			new JoustCardCharacter("gorilla", "Gorilla", "food", "poking", 3, 3),
 			new JoustCardCharacter("panda", "Panda", "food", "poking", 3, 1),
-			new JoustCardCharacter("hippo", "Hippo", "food", "distraction", 3, 2),
+			new JoustCardCharacter("hippo", "Hippo", "food", "distracting", 3, 2),
 			
-			new JoustCardCharacter("cat", "Cat", "distraction", "food", 2, 3),
-			new JoustCardCharacter("monkey", "Monkey", "distraction", "poking", 2, 3),
-			new JoustCardCharacter("sloth", "Sloth", "poking", "distraction", 2, 1),
-			new JoustCardCharacter("baby", "Baby", "distraction", "food", 2, 1),
+			new JoustCardCharacter("cat", "Cat", "distracting", "food", 2, 3),
+			new JoustCardCharacter("monkey", "Monkey", "distracting", "poking", 2, 3),
+			new JoustCardCharacter("sloth", "Sloth", "poking", "distracting", 2, 1),
+			new JoustCardCharacter("baby", "Baby", "distracting", "food", 2, 1),
 			
 			new JoustCardCharacter("frog", "Frog", "poking", "food", 1, 1),
-			new JoustCardCharacter("chameleon", "Chameleon", "distraction", "poking", 1, 3),
-			new JoustCardCharacter("hampster", "Hampster", "poking", "distraction", 1, 2),
-			new JoustCardCharacter("ferret", "Ferret", "distraction", "poking", 1, 2),
+			new JoustCardCharacter("chameleon", "Chameleon", "distracting", "poking", 1, 3),
+			new JoustCardCharacter("hampster", "Hampster", "poking", "distracting", 1, 2),
+			new JoustCardCharacter("ferret", "Ferret", "distracting", "poking", 1, 2),
 		]
 			
 		public static function randomCharacter():JoustCardCharacter

@@ -51,9 +51,9 @@ package
 			mc.damagePointing.visible = (weapon_damageType == JoustCardWeapon.DAMAGE_POKING);
 			mc.damageFood.visible = (weapon_damageType == JoustCardWeapon.DAMAGE_FOOD);
 			
-			mc.brainBoxes.fill1.alpha = !(weapon_intelligence <= 1);
-			mc.brainBoxes.fill2.alpha = !(weapon_intelligence <= 2);
-			mc.brainBoxes.fill3.alpha = !(weapon_intelligence <= 3);
+			mc.brainBoxes2.fill1.alpha = !(weapon_intelligence <= 1);
+			mc.brainBoxes2.fill2.alpha = !(weapon_intelligence <= 2);
+			mc.brainBoxes2.fill3.alpha = !(weapon_intelligence <= 3);
 			
 			//CHARACTER SIDE
 			mc.weaknessDistraction.visible = (weakness == JoustCardWeapon.DAMAGE_DISTRACTING);
