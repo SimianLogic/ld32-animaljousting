@@ -30,19 +30,17 @@ package
 		
 		public var mc:CardCharacter;
 		
-		public var size:int;
-		public var intelligence:int;
 		
-		public var weakness:String;
-		public var strength:String;
 		
 		public function JoustCardCharacter(name:String, title:String, weakness:String, strength:String, size:int, intelligence:int)
 		{
-			this.weakness = weakness;
-			this.strength = strength;
+			hasCharacter = true;
 			
-			this.intelligence = intelligence;
-			this.size = size;
+			characterWeakness = weakness;
+			characterStrength = strength;
+			
+			characterIntelligence = intelligence;
+			characterSize = size;
 			
 			mc = new CardCharacter();
 			addChild(mc);

@@ -34,16 +34,13 @@ package
 		
 		public var mc:CardWeapon;
 		
-		public var damage:int;
-		public var damageType:String;
-		
-		public var intelligence:int;
-		
 		public function JoustCardWeapon(name:String, title:String, damage:int, damageType:String, intelligence:int)
 		{
-			this.damage = damage;
-			this.damageType = damageType;
-			this.intelligence = intelligence;
+			hasWeapon = true;
+			
+			weaponDamage = damage;
+			weaponDamageType = damageType;
+			weaponIntelligence = intelligence;
 			
 			mc = new CardWeapon();
 			addChild(mc);
