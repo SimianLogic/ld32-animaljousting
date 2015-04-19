@@ -45,7 +45,7 @@ package
 			
 			
 			//WEAPON SIDE
-			mc.damage.text = weapon_damage.toString();
+			mc.damage.text = "+" + weapon_damage;
 			
 			mc.damageDistraction.visible = (weapon_damageType == JoustCardWeapon.DAMAGE_DISTRACTING);
 			mc.damagePointing.visible = (weapon_damageType == JoustCardWeapon.DAMAGE_POKING);
@@ -57,11 +57,11 @@ package
 			
 			//CHARACTER SIDE
 			mc.weaknessDistraction.visible = (weakness == JoustCardWeapon.DAMAGE_DISTRACTING);
-			mc.weaknessPointing.visible = (weakness == JoustCardWeapon.DAMAGE_POKING);
+			mc.weaknessPoking.visible = (weakness == JoustCardWeapon.DAMAGE_POKING);
 			mc.weaknessFood.visible = (weakness == JoustCardWeapon.DAMAGE_FOOD);
 			
 			mc.strengthDistraction.visible = (strength == JoustCardWeapon.DAMAGE_DISTRACTING);
-			mc.strengthPointing.visible = (strength == JoustCardWeapon.DAMAGE_POKING);
+			mc.strengthPoking.visible = (strength == JoustCardWeapon.DAMAGE_POKING);
 			mc.strengthFood.visible = (strength == JoustCardWeapon.DAMAGE_FOOD);
 			
 			

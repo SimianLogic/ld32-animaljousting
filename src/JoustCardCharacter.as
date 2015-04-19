@@ -50,11 +50,11 @@ package
 			mc.nameLabel.text = title;
 			
 			mc.weaknessDistraction.visible = (weakness == JoustCardWeapon.DAMAGE_DISTRACTING);
-			mc.weaknessPointing.visible = (weakness == JoustCardWeapon.DAMAGE_POKING);
+			mc.weaknessPoking.visible = (weakness == JoustCardWeapon.DAMAGE_POKING);
 			mc.weaknessFood.visible = (weakness == JoustCardWeapon.DAMAGE_FOOD);
 			
 			mc.strengthDistraction.visible = (strength == JoustCardWeapon.DAMAGE_DISTRACTING);
-			mc.strengthPointing.visible = (strength == JoustCardWeapon.DAMAGE_POKING);
+			mc.strengthPoking.visible = (strength == JoustCardWeapon.DAMAGE_POKING);
 			mc.strengthFood.visible = (strength == JoustCardWeapon.DAMAGE_FOOD);
 			
 			

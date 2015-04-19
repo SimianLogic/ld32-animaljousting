@@ -51,7 +51,7 @@ package
 			
 			
 			mc.nameLabel.text = title;
-			mc.damage.text = damage.toString();
+			mc.damage.text = "+" + damage;
 			
 			mc.damageDistraction.visible = (damageType == DAMAGE_DISTRACTING);
 			mc.damagePointing.visible = (damageType == DAMAGE_POKING);

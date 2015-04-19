@@ -91,6 +91,25 @@ package
 			
 			gameplay.trade.addEventListener(MouseEvent.CLICK, handleTrade);
 			gameplay.skip.addEventListener(MouseEvent.CLICK, handleSkip);
+			gameplay.submit.addEventListener(MouseEvent.CLICK, handleSubmit);
+		}
+		
+		public function handleSubmit(e:Event):void
+		{
+			//TODO: CHECK IF IT'S OUR TURN
+			for(var i:int = 0; i < 3; i++)
+			{
+				if(workingStack[i] == null)
+				{
+					//TODO: CHECK FOR THE HORSE
+					gameplay.statusMessage.text = ["You're missing a mount!", "You're missing a rider!", "You're missing a weapon!"][i];
+					return;
+				}
+			}
+			
+			
+			
+			
 		}
 		
 		public function handleTrade(e:Event):void
