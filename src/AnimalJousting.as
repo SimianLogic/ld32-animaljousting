@@ -16,21 +16,18 @@ package
 		
 		public var gameplay:UIGameplay;
 		
-		public var hand1:MCButton;
-		public var hand2:MCButton;
-		public var hand3:MCButton;
-		public var hand4:MCButton;
-		public var hand5:MCButton;
-		
 		public var startingDeck:Array = [];
 		public var deck:Array = [];
 		public var discard:Array = [];
 		
 		//1-indexed
+		public var handSlots:Array = [null];
 		public var playerHands:Array = [null, [],[],[],[]];
 		public var playerScores:Array = [null, 0, 0, 0, 0];
 		
-		public static var STARTING_HAND_SIZE:int = 3;
+		
+		public static var STARTING_HAND_SIZE:int = 4;
+		public static var MAX_HAND_SIZE:int = 7;
 		
 		public var workingStack:Array = [null,null,null];
 		
@@ -49,23 +46,15 @@ package
 			gameplay = new UIGameplay();
 			addChild(gameplay);
 			
-			hand1 = new MCButton(gameplay.hand1);
-			hand2 = new MCButton(gameplay.hand2);
-			hand3 = new MCButton(gameplay.hand3);
-			hand4 = new MCButton(gameplay.hand4);
-			hand5 = new MCButton(gameplay.hand5);
+			var i:int;
 			
-			hand1.isEnabled = false;
-			hand2.isEnabled = false;
-			hand3.isEnabled = false;
-			hand4.isEnabled = false;
-			hand5.isEnabled = false;
-			
-			hand1.addEventListener("mc_down", handleCardDown);
-			hand2.addEventListener("mc_down", handleCardDown);
-			hand3.addEventListener("mc_down", handleCardDown);
-			hand4.addEventListener("mc_down", handleCardDown);
-			hand5.addEventListener("mc_down", handleCardDown);
+			for(i = 1; i <= MAX_HAND_SIZE; i++)
+			{
+				var hand :MCButton= new MCButton(gameplay["hand" + i]);
+				hand.isEnabled = false;
+				hand.addEventListener("mc_down", handleCardDown);
+				handSlots.push(hand);
+			}
 			
 			gameplay.handSize.text = "0";
 			gameplay.victoryPoints.text = "0";
@@ -73,8 +62,6 @@ package
 			gameplay.dropWeapon.gotoAndStop(1);
 			gameplay.dropCharacter.gotoAndStop(1);
 			gameplay.dropMount.gotoAndStop(1);
-			
-			var i:int;
 			
 			for(i = 2; i <= 4; i++)
 			{
@@ -102,8 +89,8 @@ package
 				dealCardToPlayer();
 			});
 			
-			gameplay.buttons.trade.addEventListener(MouseEvent.CLICK, handleTrade);
-			gameplay.buttons.skip.addEventListener(MouseEvent.CLICK, handleSkip);
+			gameplay.trade.addEventListener(MouseEvent.CLICK, handleTrade);
+			gameplay.skip.addEventListener(MouseEvent.CLICK, handleSkip);
 		}
 		
 		public function handleTrade(e:Event):void
@@ -174,19 +161,13 @@ package
 		
 		public function handleCardDown(e:Event):void
 		{
-			if(e.target == hand1)
+			for(var i:int = 1; i < handSlots.length; i++)
 			{
-				startCardDrag(0);
-			}else if(e.target == hand2){
-				startCardDrag(1);
-			}else if(e.target == hand3){
-				startCardDrag(2);
-			}else if(e.target == hand4){
-				startCardDrag(3);
-			}else if(e.target == hand5){
-				startCardDrag(4);
+				if(e.target == handSlots[i])
+				{
+					startCardDrag(i);		
+				}
 			}
-			
 		}
 		
 		public var dragIndex:int = -1;
@@ -198,17 +179,20 @@ package
 		
 		private var lastDragX:Number = Number.MAX_VALUE;
 		private var lastDragY:Number = Number.MAX_VALUE;
-		public function startCardDrag(index:int):void
+		public function startCardDrag(index:int):void  //1-indexed
 		{
 			dragIndex = index;
 			
-			activeCard = playerHands[1][index] as JoustCardBase;
+			//hand is 0-based, everything else is name-based
+			trace("START DRAGGING " + index);
+			activeCard = playerHands[1][index - 1] as JoustCardBase;
 			
 			addChild(activeCard);
-			activeCard.x = this["hand" + (1+index)].x;
-			activeCard.y = this["hand" + (1+index)].y;
 			
-			activeHand = this["hand" + (1+index)];
+			activeCard.x = handSlots[index].x;
+			activeCard.y = handSlots[index].y;
+			
+			activeHand = handSlots[index];
 			
 			activeCard.scaleX = gameplay.hand1.scaleX;
 			activeCard.scaleY = gameplay.hand1.scaleY;
@@ -290,7 +274,7 @@ package
 			{
 				//never passed the dead zone
 				trace("NOT DRAGGING, GO HOME");
-				playerCardDealt(dragIndex + 1);
+				playerCardDealt(dragIndex);
 				return;
 			}
 			
@@ -302,7 +286,7 @@ package
 				Actuate.tween(activeCard, 1, { 
 					x:activeHand.x,
 					y:activeHand.y
-				}).onComplete (playerCardDealt,(dragIndex+1));
+				}).onComplete (playerCardDealt,dragIndex);
 				
 				return;
 			}
@@ -322,7 +306,9 @@ package
 			{
 				if(playerHands[1][i] == activeCard)
 				{
+					trace("NULL OUT " + i);
 					playerHands[1][i] = null;
+					handSlots[dragIndex].isEnabled = false;
 					card_index = i;
 				}
 			}
@@ -354,7 +340,7 @@ package
 					Actuate.tween(active_card, 1, { 
 						x:active_hand.x,
 						y:active_hand.y
-					}).onComplete(playerCardDealt,(drag_index+1));
+					}).onComplete(playerCardDealt, drag_index);
 					
 				});
 			}, 250);
@@ -370,7 +356,7 @@ package
 			card.rotation = 0;
 			card.faceUp();
 			
-			if(index < 6)
+			if(index <= MAX_HAND_SIZE)
 			{
 				card.x = 0;
 				card.y = 0;
@@ -378,7 +364,7 @@ package
 				card.scaleY = 1;
 				
 				gameplay["hand" + index].holder.addChild(card);
-				this["hand"+index].isEnabled = true;
+				handSlots[index].isEnabled = true;
 			}
 			
 		}
@@ -422,10 +408,10 @@ package
 			var target_rotation:Number;
 			var target_duration:Number = 1.0;
 						
-			if(index < 6)
+			if(index <= MAX_HAND_SIZE)
 			{
-				target_x = this["hand" + index].x;
-				target_y = this["hand" + index].y;
+				target_x = handSlots[index].x;
+				target_y = handSlots[index].y;
 				trace("GOTO hand" + index + "     " + target_x + "," + target_y);
 				target_duration = 1.0;
 				target_rotation = 180.0;

@@ -65,8 +65,8 @@ package
 			mc.strengthFood.visible = (strength == JoustCardWeapon.DAMAGE_FOOD);
 			
 			
-			mc.brainBoxes.fill1.alpha = !(character_intelligence == 1);
-			mc.brainBoxes.fill2.alpha = !(character_intelligence == 2);
+			mc.brainBoxes.fill1.alpha = !(character_intelligence >= 1);
+			mc.brainBoxes.fill2.alpha = !(character_intelligence >= 2);
 			mc.brainBoxes.fill3.alpha = !(character_intelligence == 3);
 			
 			mc.sizeBoxes.fill1.alpha = !(size == 1);

@@ -5,17 +5,18 @@ package
 	public class JoustCardMountCharacter extends JoustCardBase
 	{
 		
-		public static var Horse:JoustCardMountCharacter = new JoustCardMountCharacter("horse", "Horse", "poking", "distracting", 8);
+		public static var Horse:JoustCardMountCharacter = new JoustCardMountCharacter("horse", "Horse", "poking", "distracting", 2, 8);
 		
 		public var mc:CardMountCharacter;
 		
-		public function JoustCardMountCharacter(name:String, title:String, weakness:String, strength:String, damage:int)
+		public function JoustCardMountCharacter(name:String, title:String, weakness:String, strength:String, intelligence:int, damage:int)
 		{
 			hasCharacter = true;
 			hasMount = true;
 			
 			characterWeakness = weakness;
 			characterStrength = strength;
+			characterIntelligence = intelligence
 			mountDamage = damage;
 
 			//parity!
@@ -40,6 +41,10 @@ package
 			mc.strengthDistraction.visible = (strength == JoustCardWeapon.DAMAGE_DISTRACTING);
 			mc.strengthPointing.visible = (strength == JoustCardWeapon.DAMAGE_POKING);
 			mc.strengthFood.visible = (strength == JoustCardWeapon.DAMAGE_FOOD);
+			
+			mc.brainBoxes.fill1.alpha = !(intelligence >= 1);
+			mc.brainBoxes.fill2.alpha = !(intelligence >= 2);
+			mc.brainBoxes.fill3.alpha = !(intelligence == 3);
 			
 		}
 	}
