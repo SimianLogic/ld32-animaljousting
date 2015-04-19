@@ -10,7 +10,6 @@ package
 		public static var Cactus:JoustCardWeaponOrCharacter = new JoustCardWeaponOrCharacter("cactus", "Cactus", 5, "poking", 2, "food", "poking", 1, 2);
 		
 		public var mc:CardWeaponOrCharacter;
-		public var portrait2:MovieClip;
 		
 		public function JoustCardWeaponOrCharacter(name:String, title:String, weapon_damage:int, weapon_damageType:String, weapon_intelligence:int, weakness:String, strength:String, character_intelligence:int, size:int)
 		{
@@ -30,16 +29,7 @@ package
 			mc = new CardWeaponOrCharacter();
 			addChild(mc);
 			
-			super(name);
-			
-			portrait.x -= width/4;
-			
-			var graphic_mc:String = "MC_" + cardName + "_weapon";
-			trace("LOAD " + graphic_mc);
-			var klass:Class = getDefinitionByName(graphic_mc) as Class;
-			portrait2 = new klass() as MovieClip;
-			addChild(portrait2);
-			portrait2.x += width/4 - portrait2.width/2;		
+			super(name);		
 			
 			mc.nameLabel.text = title;
 			

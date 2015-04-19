@@ -17,12 +17,12 @@ package
 			
 			MC_wagon_card, MC_vacuum_card, MC_unicycle_card, MC_tricycle_card, 
 			MC_toasterLauncher_card, MC_sloth_card, MC_skateboard_card, MC_shoppingCart_card, MC_roomba_card, 
-			MC_pug_card, MC_pogostick_card, MC_panda_card, MC_moped_card, MC_mop_card, MC_monkey_card, MC_lawnmower,
+			MC_pug_card, MC_pogostick_card, MC_panda_card, MC_moped_card, MC_mop_card, MC_monkey_card, 
 			MC_lavalamp_card, MC_horse_card, MC_hippo_card, MC_hampsterBall_card, 
 			MC_hampster_card, MC_gyrocopter_card, MC_gorilla_card, MC_golfclub_card, MC_drone_card, 
 			MC_frog_card, MC_flagpole_card, MC_ferret_card, MC_dog_card, MC_discoball_card, MC_chocolatefountain_card, 
 			MC_chameleon_card, MC_cat_card, MC_cardboardtube_card, MC_cactus_card, MC_bubblewand_card, 
-			MC_bananas_card, MC_baby_card,
+			MC_bananas_card, MC_baby_card, MC_lawnmower_card, 
 			MC_laserpointer_card, 
 			MC_ham_card
 		];
@@ -59,7 +59,7 @@ package
 			
 			this.cardName = name;
 			
-			var graphic_mc:String = "MC_" + cardName;
+			var graphic_mc:String = "MC_" + cardName + "_card";
 			trace("LOAD " + graphic_mc);
 			var klass:Class = getDefinitionByName(graphic_mc) as Class;
 			portrait = new klass() as MovieClip;

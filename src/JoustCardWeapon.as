@@ -47,8 +47,6 @@ package
 			
 			super(name);
 			
-			portrait.x -= portrait.width/2;
-			
 			
 			mc.nameLabel.text = title;
 			mc.damage.text = "+" + damage;

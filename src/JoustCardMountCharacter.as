@@ -28,8 +28,6 @@ package
 			
 			super(name);
 			
-			portrait.y += 16;
-			
 			mc.nameLabel.text = title;
 			
 			mc.damage.text = damage.toString();
