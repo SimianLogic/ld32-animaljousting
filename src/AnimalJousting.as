@@ -7,6 +7,7 @@ package
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import flash.utils.getDefinitionByName;
 	import flash.utils.setTimeout;
 	
 	
@@ -30,6 +31,11 @@ package
 		public static var MAX_HAND_SIZE:int = 7;
 		
 		public var workingStack:Array = [null,null,null];
+		
+		
+		public var kingPlayerIndex:int = 0; //no one is king yet!
+		public var kingStack:Array = [null,null,null];
+		public var challengerStack:Array = [null,null,null]; 
 		
 		public function AnimalJousting()
 		{
@@ -56,7 +62,6 @@ package
 				handSlots.push(hand);
 			}
 			
-			gameplay.handSize.text = "0";
 			gameplay.victoryPoints.text = "0";
 			
 			gameplay.dropWeapon.gotoAndStop(1);
@@ -92,6 +97,10 @@ package
 			gameplay.trade.addEventListener(MouseEvent.CLICK, handleTrade);
 			gameplay.skip.addEventListener(MouseEvent.CLICK, handleSkip);
 			gameplay.submit.addEventListener(MouseEvent.CLICK, handleSubmit);
+			
+			
+			gameplay.jouster1.visible = false;
+			gameplay.jouster2.visible = false;
 		}
 		
 		public function handleSubmit(e:Event):void
@@ -106,10 +115,6 @@ package
 					return;
 				}
 			}
-			
-			
-			
-			
 		}
 		
 		public function handleTrade(e:Event):void
@@ -121,6 +126,7 @@ package
 			{
 				if(workingStack[i] != null)
 				{
+					gameplay.statusMessage.text = "Can't trade while you've got cards on the stack!";
 					return;
 				}
 			}
@@ -374,6 +380,7 @@ package
 					card_index = i;
 				}
 			}
+			refreshStack();
 			
 			//close in on our target!
 			Actuate.tween(activeCard, 0.25, { 
@@ -398,6 +405,8 @@ package
 					playerHands[1][card_index] = active_card;
 					
 					updateLabels();
+					
+					refreshStack();
 					
 					Actuate.tween(active_card, 1, { 
 						x:active_hand.x,
@@ -431,6 +440,88 @@ package
 			
 		}
 		
+		public function refreshStack()
+		{
+			if(kingPlayerIndex == 0)
+			{
+				setKing(workingStack[0], workingStack[1], workingStack[2]);
+			}else{
+				setChallenger(workingStack[0], workingStack[1], workingStack[2]);
+			}
+		}
+		
+		public function setKing(mount:JoustCardBase, rider:JoustCardBase, weapon:JoustCardBase)
+		{
+			for(var i:int = 0; i < 3; i++)
+			{
+				if(kingStack[i] != null)
+				{
+					kingStack[i].parent.removeChild(kingStack[i]);
+					kingStack[i] = null;
+				}	
+			}
+			
+			var mount_clip:MovieClip;
+			var rider_clip:MovieClip;
+			var weapon_clip:MovieClip;
+			
+			var klass:Class;
+						
+			if(mount != null)
+			{
+				klass = getDefinitionByName("MC_" + mount.cardName) as Class;
+				mount_clip = new klass() as MovieClip;
+				addChild(mount_clip);
+				
+				mount_clip.x = gameplay.jouster1.x;
+				mount_clip.y = gameplay.jouster1.y;
+				
+				kingStack[0] = mount_clip;
+			}
+			
+			if(rider != null)
+			{
+				klass = getDefinitionByName("MC_" + rider.cardName) as Class;
+				rider_clip = new klass() as MovieClip;
+				
+				if(mount_clip == null)
+				{
+					addChild(rider_clip);
+					rider_clip.x = gameplay.jouster1.x;
+					rider_clip.y = gameplay.jouster1.y;	
+				}else{
+					mount_clip["character"].addChild(rider_clip);
+				}
+				
+				kingStack[2] = rider_clip;
+			}
+			
+			if(weapon != null)
+			{
+				klass = getDefinitionByName("MC_" + weapon.cardName) as Class;
+				weapon_clip = new klass() as MovieClip;
+				addChild(weapon_clip);
+				
+				if(mount_clip == null)
+				{
+					addChild(weapon_clip);
+					weapon_clip.x = gameplay.jouster1.x;
+					weapon_clip.y = gameplay.jouster1.y;	
+				}else{
+					mount_clip["weapon"].addChild(weapon_clip);
+				}
+				
+				kingStack[1] = weapon_clip;
+			}
+			
+			
+		}
+		
+		public function setChallenger(mount:JoustCardBase, rider:JoustCardBase, weapon:JoustCardBase)
+		{
+			
+		}
+		
 		public function updateLabels()
 		{
 			var handsize:int = 0;
@@ -442,7 +533,6 @@ package
 				}
 			}
 			
-			gameplay.handSize.text = handsize.toString();
 			gameplay.deckCount.text = "DECK: " + deck.length;
 			gameplay.discardCount.text = "DISCARD: " + discard.length;
 		}

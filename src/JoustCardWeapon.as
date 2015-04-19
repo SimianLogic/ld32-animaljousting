@@ -54,7 +54,7 @@ package
 			mc.damage.text = "+" + damage;
 			
 			mc.damageDistraction.visible = (damageType == DAMAGE_DISTRACTING);
-			mc.damagePointing.visible = (damageType == DAMAGE_POKING);
+			mc.damagePoking.visible = (damageType == DAMAGE_POKING);
 			mc.damageFood.visible = (damageType == DAMAGE_FOOD);
 			
 			trace("INTELLIGENCE IS " + intelligence);

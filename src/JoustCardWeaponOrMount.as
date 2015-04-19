@@ -44,7 +44,7 @@ package
 			mc.damage.text = weapon_damage.toString();
 			
 			mc.damageDistraction.visible = (weapon_damageType == JoustCardWeapon.DAMAGE_DISTRACTING);
-			mc.damagePointing.visible = (weapon_damageType == JoustCardWeapon.DAMAGE_POKING);
+			mc.damagePoking.visible = (weapon_damageType == JoustCardWeapon.DAMAGE_POKING);
 			mc.damageFood.visible = (weapon_damageType == JoustCardWeapon.DAMAGE_FOOD);
 			
 			mc.brainBoxes.fill1.alpha = !(intelligence <= 1);
