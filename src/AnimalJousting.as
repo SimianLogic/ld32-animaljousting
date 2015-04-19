@@ -252,7 +252,7 @@ package
 			for(var i:int = 0; i < 3; i++)
 			{
 				targets[i].gotoAndStop(1);
-				if(eligible[i] && workingStack[i] == null && overlaps[i] > max_area)
+				if(eligible[i] && workingStack[i] == null && overlaps[i] > max_area && canDrop(activeCard, i))
 				{
 					keeper = i;
 					max_area = overlaps[i];
@@ -264,6 +264,49 @@ package
 				targets[keeper].gotoAndStop(2);
 				activeDrop = targets[keeper];
 			}			
+		}
+		
+		public function canDrop(card:JoustCardBase, slot:int):Boolean
+		{
+			//DROPPING A MOUNT, MAKE SURE IT CAN HOLD OUR RIDER
+			if(slot == 0 && workingStack[1] != null)
+			{
+				if((workingStack[1] as JoustCardBase).characterSize > card.mountSize)
+				{
+					return false;
+				}
+			}
+			
+			//DROP A CHARACTER, SAME CHECK
+			if(slot == 1 && workingStack[0] != null)
+			{
+				if((workingStack[0] as JoustCardBase).mountSize < card.characterSize)
+				{
+					return false;
+				}
+			}
+			
+			
+			//DROPPING A WEAPON, CHECK TO SEE IF WE'RE SMART ENOUGH
+			if(slot == 2 && workingStack[1] != null)
+			{
+				if((workingStack[1] as JoustCardBase).characterIntelligence < card.weaponIntelligence)
+				{
+					return false;
+				}
+			}
+			
+			//DROPPING A CHARACTER, SAME CHECK
+			if(slot == 1 && workingStack[2] != null)
+			{
+				if((workingStack[2] as JoustCardBase).weaponIntelligence > card.characterIntelligence)
+				{
+					return false;
+				}
+			}
+
+			
+			return true;
 		}
 		public function finishDragging(event:MouseEvent):void
 		{	
