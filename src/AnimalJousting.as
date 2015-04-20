@@ -188,19 +188,26 @@ package
 				}
 			}
 			
-			if(kingPlayerIndex == 0)
-			{
-				//TODO: give credit to the current player, not just meeeeee
-				kingPlayerIndex = 1;
-			}
-			
-			
 			for(i = 0; i < 3; i++)
 			{
 				workingStack[i].parent.removeChild(workingStack[i]);
 				workingStack[i] = null;
 			}
 			
+			resolveBattle();
+		}
+		
+		public function resolveBattle():void
+		{
+			if(kingPlayerIndex == 0)
+			{
+				trace("PLAYER 1 IS NOW KING!");
+				kingPlayerIndex = CURRENT_PLAYER;
+			}
+			
+			
+			
+			nextTurn();
 		}
 		
 		public function handleTrade(e:Event):void
@@ -827,7 +834,7 @@ package
 			if(deck.length == 0)
 			{
 				trace("OUT OF CARDS");
-				return;
+				reshuffle();
 			}
 			
 			trace("DEAL CARD TO PLAYER " + player);
@@ -864,12 +871,32 @@ package
 			}, target_duration * 1000);	
 		}
 		
+		public function reshuffle():void
+		{
+			while(discard.length > 0)
+			{
+				var which:int = Math.floor(Math.random() * discard.length);
+				var card:JoustCardBase = discard.splice(which, 1)[0];
+				deck.push(card);
+			}
+			
+			for(var i:int = 0; i < deck.length; i++)
+			{
+				deck[i].faceDown();
+				
+				deck[i].x = gameplay.deckPile.x;
+				deck[i].y = gameplay.deckPile.y;
+				
+				deck[i].rotation = 0;
+			}
+		}
+		
 		public function dealCardToPlayer():void
 		{
 			if(deck.length == 0)
 			{
 				trace("OUT OF CARDS");
-				return;
+				reshuffle();
 			}
 			
 			var which:int = Math.floor(Math.random() * deck.length);
