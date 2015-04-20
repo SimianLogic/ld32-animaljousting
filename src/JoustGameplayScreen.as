@@ -31,8 +31,8 @@ package
 		
 		
 		public static var STARTING_HAND_SIZE:int = 4;
-		public static var MAX_HAND_SIZE:int = 10;
-		public static var VICTORY_SCORE:int = 1;
+		public static var MAX_HAND_SIZE:int = 7;
+		public static var VICTORY_SCORE:int = 10;
 		
 		public var workingStack:Array = [null,null,null,null];
 		
