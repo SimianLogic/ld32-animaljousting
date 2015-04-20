@@ -144,6 +144,7 @@ package
 			trace("CURRENT PLAYER: " + CURRENT_PLAYER);
 			var banners:Array = [null, "YOUR TURN", "PUG'S TURN", "CACTUS'S TURN", "MONKEY'S TURN"];
 			
+			addChild(gameplay.turnAnnouncement);
 			gameplay.turnAnnouncement.gotoAndPlay(1);
 			gameplay.turnAnnouncement.bannerClip.bannerText.text = banners[CURRENT_PLAYER];
 			gameplay.turnAnnouncement.visible = true;
@@ -207,15 +208,26 @@ package
 			//TODO: CHECK IF IT'S OUR TURN
 			
 			
+			var got_one:Boolean = false;
 			for(var i:int = 0; i < workingStack.length; i++)
 			{
 				if(workingStack[i] != null)
 				{
-					gameplay.statusMessage.text = "Can't trade with cards on the stack!";
-					return;
+					workingStack[i].goHome();
+					got_one = true;
 				}
 			}
 			
+			if(got_one)
+			{
+				setTimeout(actuallyTrade, 1000);
+			}else{
+				actuallyTrade();	
+			}
+		}
+		
+		public function actuallyTrade():void
+		{
 			
 			var discards:int = 0;
 			while(playerHands[1].length > 0)
@@ -270,7 +282,22 @@ package
 				return;
 			}
 			
-			nextTurn();
+			var got_one:Boolean = false;
+			for(var i:int = 0; i < workingStack.length; i++)
+			{
+				if(workingStack[i] != null)
+				{
+					workingStack[i].goHome();
+					got_one = true;
+				}
+			}
+			
+			if(got_one)
+			{
+				setTimeout(nextTurn, 1000);
+			}else{
+				nextTurn();	
+			}
 		}
 		
 		public function handleCardDown(e:Event):void
@@ -576,6 +603,9 @@ package
 				mount_clip = new klass() as MovieClip;
 				addChild(mount_clip);
 				
+				mount_clip.character.graphic.visible = false;
+				mount_clip.weapon.graphic.visible = false;
+				
 				mount_clip.x = gameplay.jouster1.x;
 				mount_clip.y = gameplay.jouster1.y;
 				
@@ -686,6 +716,8 @@ package
 			{
 				klass = getDefinitionByName("MC_" + mount.cardName) as Class;
 				mount_clip = new klass() as MovieClip;
+				mount_clip.character.graphic.visible = false;
+				mount_clip.weapon.graphic.visible = false;
 				addChild(mount_clip);
 				
 				mount_clip.x = gameplay.jouster2.x;

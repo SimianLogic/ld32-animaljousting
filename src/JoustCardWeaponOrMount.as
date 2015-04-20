@@ -32,6 +32,8 @@ package
 			super(name);
 			mc.nameLabel.text = title;
 			
+//			portrait.art.character.graphic.visible = false;
+//			portrait.art.weapon.graphic.visible = false;
 			
 			//WEAPON SIDE
 			mc.damage.text = weapon_damage.toString();

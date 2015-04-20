@@ -63,6 +63,7 @@ package
 			trace("LOAD " + graphic_mc);
 			var klass:Class = getDefinitionByName(graphic_mc) as Class;
 			portrait = new klass() as MovieClip;
+			portrait.stop();			
 			addChild(portrait);
 			
 		}
