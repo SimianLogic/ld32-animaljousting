@@ -66,7 +66,7 @@ package
 			this.name = name;
 			this.cardName = name;
 			
-			if(!hasCardDraw)
+			if(!hasCardDraw && !hasBuff)
 			{
 				var graphic_mc:String = "MC_" + cardName + "_card";
 				trace("LOAD " + graphic_mc);

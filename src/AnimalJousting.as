@@ -19,6 +19,7 @@ package
 		
 		public var game:JoustGameplayScreen;
 		public var splash:UISplash;
+		public var gameover:UIWin;
 		
 		
 		public static var musicEnabled:Boolean = true;
@@ -111,11 +112,45 @@ package
 			AnimalJousting.buttonSound();
 			stage.color = 0xffffff;
 			
+			if(game != null && contains(game))
+			{
+				removeChild(game);
+			}
+			
 			game = new JoustGameplayScreen();
 			addChild(game);			
 			
 			splash.stop();
-			removeChild(splash);
+			if(contains(splash))
+			{
+				removeChild(splash);	
+			}
+			
+			
+			if(gameover != null)
+			{
+				removeChild(gameover);
+			}
+			
+			game.addEventListener("you",showGameOver);
+			game.addEventListener("pug",showGameOver);
+			game.addEventListener("cactus",showGameOver);
+			game.addEventListener("monkey",showGameOver);
+		}
+		
+		
+		public function showGameOver(e:Event):void
+		{
+			if(gameover == null)
+			{
+				gameover = new UIWin();
+				gameover.again.addEventListener(MouseEvent.CLICK, playGame);
+			}
+			
+			gameover.gotoAndStop(e.type);
+			
+			removeChild(game);
+			addChild(gameover);
 		}
 		
 		

@@ -31,7 +31,8 @@ package
 		
 		
 		public static var STARTING_HAND_SIZE:int = 4;
-		public static var MAX_HAND_SIZE:int = 7;
+		public static var MAX_HAND_SIZE:int = 10;
+		public static var VICTORY_SCORE:int = 1;
 		
 		public var workingStack:Array = [null,null,null,null];
 		
@@ -47,7 +48,7 @@ package
 		{
 			super();
 			
-			startingDeck = deck.concat(JoustCardWeapon.all, JoustCardMount.all, JoustCardCharacter.all, [JoustCardWeaponOrCharacter.getCactus(), JoustCardWeaponOrCharacter.getPug(), JoustCardMountCharacter.getHorse(), JoustCardWeaponOrMount.getPogoStick(), JoustCardWeaponOrCharacter.getCactus(), JoustCardWeaponOrCharacter.getPug(), JoustCardMountCharacter.getHorse(), JoustCardWeaponOrMount.getPogoStick(), new JoustCardDraw("draw1", 2), new JoustCardDraw("draw1", 2), new JoustCardDraw("draw1", 2), new JoustCardDraw("draw1", 2), new JoustCardDraw("draw1", 2), new JoustCardDraw("draw1", 2), new JoustCardDraw("draw1", 2), new JoustCardDraw("draw1", 2)]);
+			startingDeck = deck.concat(JoustCardWeapon.all, JoustCardMount.all, JoustCardCharacter.all, [JoustCardWeaponOrCharacter.getCactus(), JoustCardWeaponOrCharacter.getPug(), JoustCardMountCharacter.getHorse(), JoustCardWeaponOrMount.getPogoStick(), JoustCardWeaponOrCharacter.getCactus(), JoustCardWeaponOrCharacter.getPug(), JoustCardMountCharacter.getHorse(), JoustCardWeaponOrMount.getPogoStick(), new JoustCardDraw("draw1", 2), new JoustCardDraw("draw1", 2), new JoustCardDraw("draw1", 2), new JoustCardDraw("draw1", 2), new JoustCardDraw("draw1", 2), new JoustCardDraw("draw1", 2), new JoustCardDraw("draw1", 2), new JoustCardDraw("draw1", 2), new JoustCardBuff("buff2", 2), new JoustCardBuff("buff2", 2), new JoustCardBuff("buff2", 2), new JoustCardBuff("buff2", 2), new JoustCardBuff("buff2", 2), new JoustCardBuff("buff2", 2), new JoustCardBuff("buff2", 2), new JoustCardBuff("buff2", 2), new JoustCardBuff("buff2", 2), new JoustCardBuff("buff2", 2)]);
 			//working copy
 			
 			deck = startingDeck.concat();
@@ -228,6 +229,7 @@ package
 		
 		public function nextTurn():void
 		{
+			if(isGameOver) return;
 			refreshStack();
 			
 			CURRENT_PLAYER += 1;
@@ -355,6 +357,7 @@ package
 			var mounts:Array = [];
 			var characters:Array = [];
 			var weapons:Array = [];
+			var buffs:Array = [];
 			var i:int;
 			
 			var hasHorse:Boolean = false;
@@ -380,6 +383,10 @@ package
 					if(card.hasWeapon)
 					{
 						weapons.push(card);
+					}
+					if(card.hasBuff)
+					{
+						buffs.push(card);
 					}
 				}
 			}
@@ -483,6 +490,18 @@ package
 					{
 						return second_pass[high_score_index];
 					}else{
+						
+						
+						for(i = 0; i < buffs.length; i++)
+						{
+							if(high_score + buffs[i].attackBuff > reigning_score)
+							{
+								second_pass[high_score_index][3] = buffs[i];
+								return second_pass[high_score_index];
+							}
+						}
+						
+						
 						trace("GOT A MATCH, BUT NOT BETTER  " + high_score + " vs " + reigning_score);						
 						return null;
 					}
@@ -1202,6 +1221,7 @@ package
 			var mount:JoustCardBase = kingCardStack[0];
 			var rider:JoustCardBase = kingCardStack[1];
 			var weapon:JoustCardBase = kingCardStack[2];
+			var buff:JoustCardBuff = kingCardStack[3];
 			
 			var power:int = 0;
 			var damageType:String = "";
@@ -1295,6 +1315,11 @@ package
 				damageType = weapon.weaponDamageType;
 			}
 			
+			if(buff != null)
+			{
+				power += buff.attackBuff;
+			}
+			
 			//CHECK OUR OPPONENT
 			if(challengerCardStack[2] != null)
 			{
@@ -1334,6 +1359,7 @@ package
 			var mount:JoustCardBase = challengerCardStack[0];
 			var rider:JoustCardBase = challengerCardStack[1];
 			var weapon:JoustCardBase = challengerCardStack[2];
+			var buff:JoustCardBuff = challengerCardStack[3];
 			
 			
 			var power:int = 0;
@@ -1433,6 +1459,11 @@ package
 				damageType = weapon.weaponDamageType;
 			}
 			
+			if(buff != null)
+			{
+				power += buff.attackBuff;
+			}
+			
 			//CHECK OUR OPPONENT
 			if(kingCardStack[2] != null)
 			{
@@ -1462,8 +1493,14 @@ package
 			gameplay.stats2.strengthFood.visible = (strength == JoustCardWeapon.DAMAGE_FOOD);
 		}
 		
+		private var isGameOver:Boolean = false;
 		public function updateLabels():void
 		{
+			if(isGameOver)
+			{
+				return;
+			}
+			
 			var i:int;			
 			for(i = 2; i <= 4; i++)
 			{
@@ -1477,11 +1514,28 @@ package
 				}
 				gameplay["player" + i].handSize.text = hand_size.toString();
 				gameplay["player" + i].victoryPoints.text = playerScores[i].toString();
+				
+				if(playerScores[i] >= VICTORY_SCORE)
+				{
+					isGameOver = true;
+					dispatchEvent(new Event([null,"you","pug","cactus","monkey"][i]));
+				}
+			}
+			
+			if(playerScores[1] >= VICTORY_SCORE)
+			{
+				isGameOver = true;
+				dispatchEvent(new Event("you"));
 			}
 			
 			gameplay.victoryPoints.text = playerScores[1].toString();
 			
 			gameplay.deckCount.text = "DECK: " + deck.length;
+		}
+		
+		public function showVictory():void
+		{
+			
 		}
 		
 		public function dealCardToAI(player:int):void
