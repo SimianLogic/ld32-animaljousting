@@ -1135,7 +1135,7 @@ package
 			
 			workingStack[stack_index] = activeCard;
 			var card_index:int = -1;
-			for(var i:int = 0; i < playerHands[1].length; i++)
+			for(i = 0; i < playerHands[1].length; i++)
 			{
 				if(playerHands[1][i] == activeCard)
 				{
