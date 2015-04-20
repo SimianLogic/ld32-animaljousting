@@ -545,14 +545,19 @@ package
 		
 		public function canDrop(card:JoustCardBase, slot:int):Boolean
 		{
+			if(card is JoustCardMountCharacter)
+			{
+				return true;
+			}
+			
 			if(workingStack[0] is JoustCardMountCharacter && slot == 1)
 			{
-				return false;
+				return true;
 			}
 			
 			if(workingStack[1] is JoustCardMountCharacter && slot == 0)
 			{
-				return false;
+				return true;
 			}
 			
 			//DROPPING A MOUNT, MAKE SURE IT CAN HOLD OUR RIDER
@@ -634,6 +639,32 @@ package
 			{
 				workingStack[stack_index].goHome();	
 			}
+			
+			//HORSE STUFF
+			
+			if(activeDrop == gameplay.dropMount && workingStack[1] != null && workingStack[1] is JoustCardMountCharacter)
+			{
+				workingStack[1].goHome();
+				workingStack[1] = null;
+			}
+			if(activeDrop == gameplay.dropCharacter && workingStack[0] != null && workingStack[0] is JoustCardMountCharacter)
+			{
+				workingStack[0].goHome();
+				workingStack[0] = null;
+			}
+			
+			if(activeCard is JoustCardMountCharacter && stack_index == 0 && workingStack[1] != null)
+			{
+				workingStack[1].goHome();
+				workingStack[1] = null;
+			}
+			if(activeCard is JoustCardMountCharacter && stack_index == 1 && workingStack[0] != null)
+			{
+				workingStack[0].goHome();
+				workingStack[0] = null;
+			}
+			
+			//END HORSE STUFF
 			
 			
 			workingStack[stack_index] = activeCard;
