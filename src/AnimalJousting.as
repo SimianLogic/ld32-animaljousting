@@ -7,6 +7,7 @@ package
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import flash.media.Sound;
 	import flash.utils.getDefinitionByName;
 	import flash.utils.setTimeout;
 	
@@ -32,8 +33,24 @@ package
 
 		}
 		
+		public static var buttonSound:sfx_pop;
+		public static function buttonPressed():void
+		{
+			if(buttonSound == null)
+			{
+				buttonSound = new sfx_pop();
+			}
+			
+			if(soundEnabled)
+			{
+				(buttonSound as Sound).play();	
+			}
+		}
+		
 		public function playGame(e:Event):void
 		{
+			
+			AnimalJousting.buttonPressed();
 			stage.color = 0xffffff;
 			
 			game = new JoustGameplayScreen();

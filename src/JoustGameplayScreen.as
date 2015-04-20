@@ -158,6 +158,7 @@ package
 		
 		public function toggleHelp(e:Event):void
 		{
+			AnimalJousting.buttonPressed();
 			if(help == null)
 			{
 				help = new UIHelp();
@@ -168,11 +169,13 @@ package
 		
 		public function toggleHelpOff(e:Event):void
 		{
+			AnimalJousting.buttonPressed();
 			stage.removeChild(help);
 		}
 		
 		public function toggleMusic(e:Event):void
 		{
+			AnimalJousting.buttonPressed();
 			trace(e.currentTarget.name);
 			if(e.currentTarget.name == "music_off")
 			{
@@ -187,6 +190,7 @@ package
 		}
 		public function toggleSound(e:Event):void
 		{
+			AnimalJousting.buttonPressed();
 			trace(e.currentTarget.name);
 			if(e.currentTarget.name == "sound_off")
 			{
@@ -582,6 +586,13 @@ package
 		
 		public function handleSubmit(e:Event):void
 		{
+			AnimalJousting.buttonPressed();
+			
+			if(CURRENT_PLAYER != 1)
+			{
+				return;
+			}
+			
 			var i:int;
 			
 			
@@ -728,8 +739,8 @@ package
 		
 		public function handleTrade(e:Event):void
 		{
-			//TODO: CHECK IF IT'S OUR TURN
-			
+			AnimalJousting.buttonPressed();
+			if(CURRENT_PLAYER != 1) return;
 			
 			var got_one:Boolean = false;
 			for(var i:int = 0; i < workingStack.length; i++)
@@ -800,6 +811,8 @@ package
 		
 		public function handleSkip(e:Event):void
 		{
+			AnimalJousting.buttonPressed();
+			
 			if(CURRENT_PLAYER != 1)
 			{
 				return;
