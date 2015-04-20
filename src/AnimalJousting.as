@@ -296,7 +296,7 @@ package
 			for(var i:int = 0; i < 3; i++)
 			{
 				targets[i].gotoAndStop(1);
-				if(eligible[i] && workingStack[i] == null && overlaps[i] > max_area && canDrop(activeCard, i))
+				if(eligible[i] && overlaps[i] > max_area && canDrop(activeCard, i))
 				{
 					keeper = i;
 					max_area = overlaps[i];
@@ -387,6 +387,12 @@ package
 				stack_index = 2;
 			}
 			
+			if(workingStack[stack_index] != null)
+			{
+				workingStack[stack_index].goHome();	
+			}
+			
+			
 			workingStack[stack_index] = activeCard;
 			var card_index:int = -1;
 			for(var i:int = 0; i < playerHands[1].length; i++)
@@ -412,29 +418,32 @@ package
 			var active_drop:MovieClip = activeDrop;
 			var drag_index:int = dragIndex;
 			
+			active_card.goHome = function(event:Event = null):void
+			{
+				active_card.removeEventListener(MouseEvent.CLICK, active_card.goHome);
+				
+				workingStack[stack_index] = null;
+				playerHands[1][card_index] = active_card;
+				
+				updateLabels();
+				
+				refreshStack();
+				
+				Actuate.tween(active_card, 1, { 
+					x:active_hand.x,
+					y:active_hand.y
+				}).onComplete(playerCardDealt, drag_index);
+				
+			}
+			
 			setTimeout(function():void{
 				active_drop.gotoAndStop(1);
-				
-				active_card.addEventListener(MouseEvent.CLICK, function(event:Event):void
-				{
-					event.currentTarget.removeEventListener(event.type, arguments.callee);
-
-					workingStack[stack_index] = null;
-					playerHands[1][card_index] = active_card;
-					
-					updateLabels();
-					
-					refreshStack();
-					
-					Actuate.tween(active_card, 1, { 
-						x:active_hand.x,
-						y:active_hand.y
-					}).onComplete(playerCardDealt, drag_index);
-					
-				});
+				active_card.addEventListener(MouseEvent.CLICK, active_card.goHome);
 			}, 250);
 
 		}
+		
+
 		
 		public function playerCardDealt(index:int):void
 		{

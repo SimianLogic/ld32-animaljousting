@@ -27,6 +27,7 @@ package
 			MC_ham_card
 		];
 		
+		public var goHome:Function = null;
 		
 		public var cardName:String;
 		public var portrait:MovieClip;
