@@ -47,7 +47,7 @@ package
 		{
 			super();
 			
-			startingDeck = deck.concat(JoustCardWeapon.all, JoustCardMount.all, JoustCardCharacter.all, [JoustCardWeaponOrCharacter.getCactus(), JoustCardWeaponOrCharacter.getPug(), JoustCardMountCharacter.getHorse(), JoustCardWeaponOrMount.getPogoStick(),JoustCardMountCharacter.getHorse(),JoustCardMountCharacter.getHorse(),JoustCardMountCharacter.getHorse(),JoustCardMountCharacter.getHorse(),JoustCardMountCharacter.getHorse(),JoustCardMountCharacter.getHorse(),JoustCardMountCharacter.getHorse(),JoustCardMountCharacter.getHorse(),JoustCardMountCharacter.getHorse(),JoustCardMountCharacter.getHorse()]);
+			startingDeck = deck.concat(JoustCardWeapon.all, JoustCardMount.all, JoustCardCharacter.all, [JoustCardWeaponOrCharacter.getCactus(), JoustCardWeaponOrCharacter.getPug(), JoustCardMountCharacter.getHorse(), JoustCardWeaponOrMount.getPogoStick(), JoustCardWeaponOrCharacter.getCactus(), JoustCardWeaponOrCharacter.getPug(), JoustCardMountCharacter.getHorse(), JoustCardWeaponOrMount.getPogoStick(), new JoustCardDraw("draw1", 2), new JoustCardDraw("draw1", 2), new JoustCardDraw("draw1", 2), new JoustCardDraw("draw1", 2), new JoustCardDraw("draw1", 2), new JoustCardDraw("draw1", 2), new JoustCardDraw("draw1", 2), new JoustCardDraw("draw1", 2)]);
 			//working copy
 			
 			deck = startingDeck.concat();
@@ -111,6 +111,11 @@ package
 			
 			var i:int;
 			
+			for(i =1; i <= 4; i++)
+			{
+				gameplay["king" + i].visible = false;
+			}
+			
 			for(i = 1; i <= MAX_HAND_SIZE; i++)
 			{
 				var hand :MCButton= new MCButton(gameplay["hand" + i]);
@@ -125,6 +130,7 @@ package
 			gameplay.dropWeapon.gotoAndStop(1);
 			gameplay.dropCharacter.gotoAndStop(1);
 			gameplay.dropMount.gotoAndStop(1);
+			gameplay.discardPile.gotoAndStop(1);
 			
 			var enemy_names:Array = ["Pug","Cactus","Monkey"];
 			var enemy_portraits:Array = [new portrait_pug(), new portrait_cactus(), new portrait_monkey()];
@@ -733,7 +739,10 @@ package
 			kingPlayerIndex = CURRENT_PLAYER;
 			AnimalJousting.newKingSound();
 			
-			//TODO: MOVE THE CROWN
+			gameplay.crown.x = gameplay["king"+CURRENT_PLAYER].x;
+			gameplay.crown.y = gameplay["king"+CURRENT_PLAYER].y;
+			gameplay.crown.scaleX = [1, 0.5, 0.5, 0.5][CURRENT_PLAYER];
+			gameplay.crown.scaleY = [1, 0.5, 0.5, 0.5][CURRENT_PLAYER];
 		}
 		
 		public function handleTrade(e:Event):void
@@ -916,14 +925,22 @@ package
 			var weapon_intersect:Rectangle = activeCard.getRect(stage).intersection(gameplay.dropWeapon.getRect(stage));
 			var weapon_area:Number = weapon_intersect.width * weapon_intersect.height;
 			
+			var buff_intersect:Rectangle = activeCard.getRect(stage).intersection(gameplay.dropBuff.getRect(stage));
+			var buff_area:Number = buff_intersect.width * buff_intersect.height;
+			
+			var discard_intersect:Rectangle = activeCard.getRect(stage).intersection(gameplay.discardPile.getRect(stage));
+			var discard_area:Number = discard_intersect.width * discard_intersect.height;
+			
+			trace("DISCARD AREA: " + discard_area);
+			
 			var keeper:int = -1;
-			var targets:Array = [gameplay.dropMount, gameplay.dropCharacter, gameplay.dropWeapon];
-			var eligible:Array = [activeCard.hasMount, activeCard.hasCharacter, activeCard.hasWeapon];
-			var overlaps:Array = [mount_area, character_area, weapon_area];
+			var targets:Array = [gameplay.dropMount, gameplay.dropCharacter, gameplay.dropWeapon, gameplay.dropBuff, gameplay.discardPile];
+			var eligible:Array = [activeCard.hasMount, activeCard.hasCharacter, activeCard.hasWeapon, activeCard.hasBuff, activeCard.hasCardDraw];
+			var overlaps:Array = [mount_area, character_area, weapon_area, buff_area, discard_area];
 			
 			var max_area:int = 0;
 			activeDrop = null;
-			for(var i:int = 0; i < 3; i++)
+			for(var i:int = 0; i < targets.length; i++)
 			{
 				targets[i].gotoAndStop(1);
 				if(eligible[i] && overlaps[i] > max_area && canDrop(activeCard, i))
@@ -937,7 +954,7 @@ package
 			{
 				targets[keeper].gotoAndStop(2);
 				activeDrop = targets[keeper];
-			}			
+			}
 		}
 		
 		public function canDrop(card:JoustCardBase, slot:int):Boolean
@@ -994,7 +1011,6 @@ package
 				}
 			}
 			
-			
 			return true;
 		}
 		public function finishDragging(event:MouseEvent):void
@@ -1030,7 +1046,41 @@ package
 				stack_index = 1;
 			}else if(activeDrop == gameplay.dropWeapon){
 				stack_index = 2;
+			}else if(activeDrop == gameplay.dropBuff){
+				stack_index = 3;
+			}else if(activeDrop == gameplay.discardPile){
+				stack_index = 4;
 			}
+			
+			var i:int;
+			if(stack_index == 4)
+			{
+				discard.push(activeCard);
+				for(i = 0; i < playerHands[1].length; i++)
+				{
+					if(playerHands[1][i] == activeCard)
+					{
+						playerHands[1][i] = null;
+						handSlots[dragIndex].isEnabled = false;
+					}
+				}
+				
+				Actuate.tween(activeCard, 0.25, { 
+					x:activeDrop.x,
+					y:activeDrop.y
+				});
+				
+				for(i = 0; i < activeCard.cardsToDraw; i++)
+				{
+					dealCardToPlayer();
+				}
+				return;
+				
+				
+			}
+			
+			
+			
 			
 			if(workingStack[stack_index] != null)
 			{

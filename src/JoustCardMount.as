@@ -18,6 +18,21 @@ package
 			new JoustCardMount("tricycle", "Bicycle", 3, 6),
 			new JoustCardMount("moped", "Moped", 3, 8),
 			new JoustCardMount("gyrocopter", "Gyro Copter", 3, 6),
+			new JoustCardMount("unicycle", "Unicycle", 3, 5),
+			
+			new JoustCardMount("skateboard", "Skateboard", 1, 4),
+			new JoustCardMount("roomba", "Robot Vacuum", 1, 3),
+			new JoustCardMount("hampsterBall", "Hampster Ball", 1, 1),
+			new JoustCardMount("drone", "Drone", 1, 3),
+			
+			new JoustCardMount("shoppingCart", "Shopping Cart", 2, 5),
+			new JoustCardMount("wagon", "Wagon", 2, 4),
+			new JoustCardMount("vacuum", "Vacuum Cleaner", 2, 2),
+			new JoustCardMount("lawnmower", "Lawnmower", 2, 5),
+			
+			new JoustCardMount("tricycle", "Bicycle", 3, 6),
+			new JoustCardMount("moped", "Moped", 3, 8),
+			new JoustCardMount("gyrocopter", "Gyro Copter", 3, 6),
 			new JoustCardMount("unicycle", "Unicycle", 3, 5)
 		];
 		

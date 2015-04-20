@@ -36,6 +36,12 @@ package
 		public var hasCharacter:Boolean = false;
 		public var hasMount:Boolean = false;
 		
+		public var hasCardDraw:Boolean = false;
+		public var hasBuff:Boolean = false;
+		
+		public var cardsToDraw:int = 0;
+		public var attackBuff:int = 0;
+		
 		//didn't feel like making interfaces, so lots of properties that a card CAN have come here into the base class...
 
 		//WEAPON ATTRIBUTES
@@ -60,12 +66,14 @@ package
 			this.name = name;
 			this.cardName = name;
 			
-			var graphic_mc:String = "MC_" + cardName + "_card";
-			trace("LOAD " + graphic_mc);
-			var klass:Class = getDefinitionByName(graphic_mc) as Class;
-			portrait = new klass() as MovieClip;
-			addChild(portrait);
-			
+			if(!hasCardDraw)
+			{
+				var graphic_mc:String = "MC_" + cardName + "_card";
+				trace("LOAD " + graphic_mc);
+				var klass:Class = getDefinitionByName(graphic_mc) as Class;
+				portrait = new klass() as MovieClip;
+				addChild(portrait);				
+			}
 		}
 		
 		public function get weaponString():String

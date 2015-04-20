@@ -7,7 +7,7 @@ package
 		
 		public static function getHorse():JoustCardMountCharacter
 		{
-			return new JoustCardMountCharacter("horse", "Horse", "poking", "distracting", 2, 8);
+			return new JoustCardMountCharacter("horse", "Horse", "poking", "distracting", 2, 6);
 		}
 		
 		public var mc:CardMountCharacter;
