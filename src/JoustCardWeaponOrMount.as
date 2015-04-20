@@ -9,6 +9,11 @@ package
 		
 		public var mc:CardWeaponOrMount;
 		
+		override public function get weaponString():String
+		{
+			return "MC_" + cardName + "_weapon";
+		}
+		
 		public function JoustCardWeaponOrMount(name:String, title:String, weapon_damage:int, weapon_damageType:String, intelligence:int, size:int, mount_damage:int)
 		{
 			hasMount = true;

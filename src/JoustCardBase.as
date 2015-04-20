@@ -28,7 +28,6 @@ package
 		];
 		
 		
-		
 		public var cardName:String;
 		public var portrait:MovieClip;
 		
@@ -65,6 +64,11 @@ package
 			portrait = new klass() as MovieClip;
 			addChild(portrait);
 			
+		}
+		
+		public function get weaponString():String
+		{
+			return "MC_" + cardName;
 		}
 		
 		//default to up until told otherwise

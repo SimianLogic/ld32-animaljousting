@@ -11,6 +11,11 @@ package
 		
 		public var mc:CardWeaponOrCharacter;
 		
+		override public function get weaponString():String
+		{
+			return "MC_" + cardName + "_weapon";
+		}
+		
 		public function JoustCardWeaponOrCharacter(name:String, title:String, weapon_damage:int, weapon_damageType:String, weapon_intelligence:int, weakness:String, strength:String, character_intelligence:int, size:int)
 		{
 			hasWeapon = true;

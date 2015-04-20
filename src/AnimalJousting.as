@@ -105,14 +105,15 @@ package
 			gameplay.jouster1.visible = false;
 			gameplay.jouster2.visible = false;
 			
-			setKing(null,null,null);
-			setChallenger(null,null,null);
+			refreshStack();
 		}
 		
 		public function handleSubmit(e:Event):void
 		{
+			var i:int;
+			
 			//TODO: CHECK IF IT'S OUR TURN
-			for(var i:int = 0; i < 3; i++)
+			for(i = 0; i < 3; i++)
 			{
 				if(workingStack[i] == null)
 				{
@@ -128,6 +129,13 @@ package
 				kingPlayerIndex = 1;
 			}
 			
+			
+			for(i = 0; i < 3; i++)
+			{
+				workingStack[i].parent.removeChild(workingStack[i]);
+				workingStack[i] = null;
+			}
+			
 		}
 		
 		public function handleTrade(e:Event):void
@@ -139,7 +147,7 @@ package
 			{
 				if(workingStack[i] != null)
 				{
-					gameplay.statusMessage.text = "Can't trade while you've got cards on the stack!";
+					gameplay.statusMessage.text = "Can't trade with cards on the stack!";
 					return;
 				}
 			}
@@ -222,7 +230,6 @@ package
 			dragIndex = index;
 			
 			//hand is 0-based, everything else is name-based
-			trace("START DRAGGING " + index);
 			activeCard = playerHands[1][index - 1] as JoustCardBase;
 			
 			addChild(activeCard);
@@ -253,7 +260,6 @@ package
 			
 			if(!isDragging && (Math.abs(lastDragX - mouseX) > 15 || Math.abs(lastDragY - mouseY) > 15) )
 			{
-				trace("REALLY START DRAGGING " + isDragging);
 				isDragging = true;
 			}
 
@@ -387,7 +393,6 @@ package
 			{
 				if(playerHands[1][i] == activeCard)
 				{
-					trace("NULL OUT " + i);
 					playerHands[1][i] = null;
 					handSlots[dragIndex].isEnabled = false;
 					card_index = i;
@@ -433,8 +438,6 @@ package
 		
 		public function playerCardDealt(index:int):void
 		{
-			trace("FINISHED " + index);
-			
 			var card:JoustCardBase = playerHands[1][index-1] as JoustCardBase;
 			
 			card.rotation = 0;
@@ -448,24 +451,30 @@ package
 				card.scaleY = 1;
 				
 				gameplay["hand" + index].holder.addChild(card);
+				gameplay.setChildIndex(handSlots[index], gameplay.numChildren - 1);
 				handSlots[index].isEnabled = true;
 			}
 			
 		}
 		
-		public function refreshStack()
+		public function refreshStack():void
 		{
 			if(kingPlayerIndex == 0)
 			{
-				setKing(workingStack[0], workingStack[1], workingStack[2]);
+				kingCardStack = workingStack.concat();
 			}else{
-				setChallenger(workingStack[0], workingStack[1], workingStack[2]);
+				challengerCardStack = workingStack.concat();
 			}
+			refreshKing();
+			refreshChallenger();
 		}
 		
-		public function setKing(mount:JoustCardBase, rider:JoustCardBase, weapon:JoustCardBase):void
+		public function refreshKing():void
 		{
-			kingCardStack = [mount, rider, weapon];
+			var mount:JoustCardBase = kingCardStack[0];
+			var rider:JoustCardBase = kingCardStack[1];
+			var weapon:JoustCardBase = kingCardStack[2];
+			
 			for(var i:int = 0; i < 3; i++)
 			{
 				if(kingStack[i] != null)
@@ -521,7 +530,7 @@ package
 			
 			if(weapon != null)
 			{
-				klass = getDefinitionByName("MC_" + weapon.cardName) as Class;
+				klass = getDefinitionByName(weapon.weaponString) as Class;
 				weapon_clip = new klass() as MovieClip;
 				addChild(weapon_clip);
 				
@@ -541,14 +550,20 @@ package
 			}
 			
 			//CHECK OUR OPPONENT
-			if(challengerCardStack[1] != null)
+			if(challengerCardStack[2] != null)
 			{
 				if(challengerCardStack[2].weaponDamageType == weakness)
 				{
+					trace("King is weak to challenger attack!");
 					power -= 3;
 				}else if(challengerCardStack[2].weaponDamageType == strength){
+					trace("King is strong to challenger attack!");
 					power += 3;
+				}else{
+					trace("King is unphased by challenger attack!");
 				}
+			}else{
+				trace("CHALLENGER HAS NO WEAPON");
 			}
 			
 			gameplay.stats1.damage.text = power;
@@ -566,9 +581,12 @@ package
 			
 		}
 		
-		public function setChallenger(mount:JoustCardBase, rider:JoustCardBase, weapon:JoustCardBase):void
+		public function refreshChallenger():void
 		{
-			challengerCardStack = [mount, rider, weapon];
+			var mount:JoustCardBase = challengerCardStack[0];
+			var rider:JoustCardBase = challengerCardStack[1];
+			var weapon:JoustCardBase = challengerCardStack[2];
+			
 			for(var i:int = 0; i < 3; i++)
 			{
 				if(challengerStack[i] != null)
@@ -627,7 +645,7 @@ package
 			
 			if(weapon != null)
 			{
-				klass = getDefinitionByName("MC_" + weapon.cardName) as Class;
+				klass = getDefinitionByName(weapon.weaponString) as Class;
 				weapon_clip = new klass() as MovieClip;
 				addChild(weapon_clip);
 				
@@ -648,13 +666,17 @@ package
 			}
 			
 			//CHECK OUR OPPONENT
-			if(kingCardStack[1] != null)
+			if(kingCardStack[2] != null)
 			{
 				if(kingCardStack[2].weaponDamageType == weakness)
 				{
+					trace("CHALLENGER IS WEAK TO KING ATTACK");
 					power -= 3;
 				}else if(kingCardStack[2].weaponDamageType == strength){
+					trace("CHALLENGER IS STRONG TO KING ATTACK");
 					power += 3;
+				}else{
+					trace("CHALLENGER INDIFFERENT TO KING ATTACK");
 				}
 			}
 			
@@ -714,7 +736,6 @@ package
 			{
 				target_x = handSlots[index].x;
 				target_y = handSlots[index].y;
-				trace("GOTO hand" + index + "     " + target_x + "," + target_y);
 				target_duration = 1.0;
 				target_rotation = 180.0;
 			}else{
