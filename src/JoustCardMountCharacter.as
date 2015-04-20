@@ -5,7 +5,10 @@ package
 	public class JoustCardMountCharacter extends JoustCardBase
 	{
 		
-		public static var Horse:JoustCardMountCharacter = new JoustCardMountCharacter("horse", "Horse", "poking", "distracting", 2, 8);
+		public static function getHorse():JoustCardMountCharacter
+		{
+			return new JoustCardMountCharacter("horse", "Horse", "poking", "distracting", 2, 8);
+		}
 		
 		public var mc:CardMountCharacter;
 		
@@ -27,6 +30,9 @@ package
 			addChild(mc);
 			
 			super(name);
+			
+			trace("MOUNTCHARACTER: " + portrait);
+			portrait.art.stop();
 			
 			mc.nameLabel.text = title;
 			

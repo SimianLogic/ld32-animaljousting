@@ -32,19 +32,19 @@ package
 		public static var STARTING_HAND_SIZE:int = 4;
 		public static var MAX_HAND_SIZE:int = 7;
 		
-		public var workingStack:Array = [null,null,null];
+		public var workingStack:Array = [null,null,null,null];
 		
 		
 		public var kingPlayerIndex:int = 0; //no one is king yet!
 		public var kingStack:Array = [null,null,null];
 		public var challengerStack:Array = [null,null,null]; 
 		
-		public var kingCardStack:Array = [null,null,null];
-		public var challengerCardStack:Array = [null,null,null];
+		public var kingCardStack:Array = [null,null,null, null];
+		public var challengerCardStack:Array = [null,null,null,null];
 		
 		public function AnimalJousting()
 		{
-			startingDeck = deck.concat(JoustCardWeapon.all, JoustCardMount.all, JoustCardCharacter.all, [JoustCardWeaponOrCharacter.Cactus, JoustCardWeaponOrCharacter.Pug, JoustCardMountCharacter.Horse, JoustCardWeaponOrMount.PogoStick]);
+			startingDeck = deck.concat(JoustCardWeapon.all, JoustCardMount.all, JoustCardCharacter.all, [JoustCardWeaponOrCharacter.getCactus(), JoustCardWeaponOrCharacter.getPug(), JoustCardMountCharacter.getHorse(), JoustCardWeaponOrMount.getPogoStick(),JoustCardMountCharacter.getHorse(),JoustCardMountCharacter.getHorse(),JoustCardMountCharacter.getHorse(),JoustCardMountCharacter.getHorse(),JoustCardMountCharacter.getHorse(),JoustCardMountCharacter.getHorse(),JoustCardMountCharacter.getHorse(),JoustCardMountCharacter.getHorse(),JoustCardMountCharacter.getHorse(),JoustCardMountCharacter.getHorse()]);
 			//working copy
 			
 			deck = startingDeck.concat();
@@ -77,6 +77,7 @@ package
 			
 			gameplay.victoryPoints.text = "0";
 			
+			gameplay.dropBuff.gotoAndStop(1);
 			gameplay.dropWeapon.gotoAndStop(1);
 			gameplay.dropCharacter.gotoAndStop(1);
 			gameplay.dropMount.gotoAndStop(1);
@@ -131,13 +132,13 @@ package
 			gameplay.jouster1.visible = false;
 			gameplay.jouster2.visible = false;
 			
-			refreshStack();
-			
 			setTimeout(nextTurn, delay + 1000);
 		}
 		
 		public function nextTurn():void
 		{
+			refreshStack();
+			
 			CURRENT_PLAYER += 1;
 			
 			if(CURRENT_PLAYER == 5)
@@ -180,21 +181,23 @@ package
 		{
 			var i:int;
 			
-			//TODO: CHECK IF IT'S OUR TURN
-			for(i = 0; i < 3; i++)
+			
+			if(workingStack[0] == null && !(workingStack[1] is JoustCardMountCharacter))
 			{
-				if(workingStack[i] == null)
-				{
-					//TODO: CHECK FOR THE HORSE
-					gameplay.statusMessage.text = ["You're missing a mount!", "You're missing a rider!", "You're missing a weapon!"][i];
-					return;
-				}
+				gameplay.statusMessage.text = "You're missing a mount!";
+				return;
 			}
 			
-			for(i = 0; i < 3; i++)
+			if(workingStack[1] == null && !(workingStack[0] is JoustCardMountCharacter))
 			{
-				workingStack[i].parent.removeChild(workingStack[i]);
-				workingStack[i] = null;
+				gameplay.statusMessage.text = "You're missing a rider!";
+				return;
+			}
+			
+			if(workingStack[2] == null)
+			{
+				gameplay.statusMessage.text = "You're missing a weapon!";
+				return;
 			}
 			
 			resolveBattle();
@@ -202,15 +205,36 @@ package
 		
 		public function resolveBattle():void
 		{
+			if(workingStack[3] != null)
+			{
+				discard.push(workingStack[3]);
+				workingStack[3] = null;
+				Actuate.tween(workingStack[3], 0.5, { 
+					x:gameplay.discardPile.x,
+					y:gameplay.discardPile.y
+				});
+			}
+			
+			
+			
 			if(kingPlayerIndex == 0)
 			{
 				newSheriffInTown();
 				
 				addChild(gameplay.winnerAnnouncement);
 				gameplay.winnerAnnouncement.gotoAndPlay(1);
-				gameplay.winnerAnnouncement.bannerClip.bannerText.text = "NEW KING OF THE HILL";
+				gameplay.winnerAnnouncement.bannerClip.bannerText.text = "NEW KING!";
 				gameplay.winnerAnnouncement.visible = true;
 				
+				kingCardStack = workingStack.concat();
+				for(i = 0; i < 3; i++)
+				{
+					if(workingStack[i] != null)
+					{
+						workingStack[i].parent.removeChild(workingStack[i]);
+						workingStack[i] = null;	
+					}
+				}
 				return;
 			}
 			
@@ -219,7 +243,7 @@ package
 			var king_score:int = parseInt(gameplay.stats1.damage.text);
 			var challenger_score:int = parseInt(gameplay.stats2.damage.text);
 			
-			if(challenger_score > king_score)
+			if(challenger_score >= king_score)
 			{
 				newSheriffInTown();
 				
@@ -246,16 +270,24 @@ package
 					}
 				}
 				
+				kingCardStack = workingStack.concat();
+				for(i = 0; i < 3; i++)
+				{
+					workingStack[i].parent.removeChild(workingStack[i]);
+					workingStack[i] = null;
+				}
+				
 			}else{
 				addChild(gameplay.winnerAnnouncement);
 				gameplay.winnerAnnouncement.gotoAndPlay(1);
 				gameplay.winnerAnnouncement.bannerClip.bannerText.text = "KING WINS!";
 				gameplay.winnerAnnouncement.visible = true;
 				
-				for(i = 0; i < workingStack.length; i++)
+				for(i = 0; i < workingStack.length - 1; i++) //don't bother with the top one
 				{
 					if(workingStack[i] != null)
 					{
+						addChild(workingStack[i]);
 						Actuate.tween(workingStack[i], 0.5, { 
 							x:gameplay.discardPile.x,
 							y:gameplay.discardPile.y
@@ -489,6 +521,16 @@ package
 		
 		public function canDrop(card:JoustCardBase, slot:int):Boolean
 		{
+			if(workingStack[0] is JoustCardMountCharacter && slot == 1)
+			{
+				return false;
+			}
+			
+			if(workingStack[1] is JoustCardMountCharacter && slot == 0)
+			{
+				return false;
+			}
+			
 			//DROPPING A MOUNT, MAKE SURE IT CAN HOLD OUR RIDER
 			if(slot == 0 && workingStack[1] != null)
 			{
@@ -659,6 +701,12 @@ package
 			var rider:JoustCardBase = kingCardStack[1];
 			var weapon:JoustCardBase = kingCardStack[2];
 			
+			if(rider is JoustCardMountCharacter)
+			{
+				mount = rider;
+				rider = null;
+			}
+			
 			for(var i:int = 0; i < 3; i++)
 			{
 				if(kingStack[i] != null)
@@ -685,7 +733,10 @@ package
 				mount_clip = new klass() as MovieClip;
 				addChild(mount_clip);
 				
-				mount_clip.character.graphic.visible = false;
+				if(mount_clip.hasOwnProperty("character"))
+				{
+					mount_clip.character.graphic.visible = false;		
+				}
 				mount_clip.weapon.graphic.visible = false;
 				
 				mount_clip.x = gameplay.jouster1.x;
@@ -774,6 +825,13 @@ package
 			var rider:JoustCardBase = challengerCardStack[1];
 			var weapon:JoustCardBase = challengerCardStack[2];
 			
+			if(rider is JoustCardMountCharacter)
+			{
+				trace("USE THE RIDER AS THE MOUNT");
+				mount = rider;
+				rider = null;
+			}
+			
 			for(var i:int = 0; i < 3; i++)
 			{
 				if(challengerStack[i] != null)
@@ -796,9 +854,13 @@ package
 			
 			if(mount != null)
 			{
+				trace("ADDING MOUNT");
 				klass = getDefinitionByName("MC_" + mount.cardName) as Class;
 				mount_clip = new klass() as MovieClip;
-				mount_clip.character.graphic.visible = false;
+				if(mount_clip.hasOwnProperty("character"))
+				{
+					mount_clip.character.graphic.visible = false;		
+				}
 				mount_clip.weapon.graphic.visible = false;
 				addChild(mount_clip);
 				
@@ -814,6 +876,7 @@ package
 			
 			if(rider != null)
 			{
+				trace("ADDING RIDER");
 				klass = getDefinitionByName("MC_" + rider.cardName) as Class;
 				rider_clip = new klass() as MovieClip;
 				
@@ -834,6 +897,7 @@ package
 			
 			if(weapon != null)
 			{
+				trace("ADDING WEAPON");
 				klass = getDefinitionByName(weapon.weaponString) as Class;
 				weapon_clip = new klass() as MovieClip;
 				addChild(weapon_clip);

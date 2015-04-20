@@ -6,8 +6,14 @@ package
 	public class JoustCardWeaponOrCharacter extends JoustCardBase
 	{
 		
-		public static var Pug:JoustCardWeaponOrCharacter = new JoustCardWeaponOrCharacter("pug", "Pug", 3, "distracting", 2, "food", "poking", 1, 1);
-		public static var Cactus:JoustCardWeaponOrCharacter = new JoustCardWeaponOrCharacter("cactus", "Cactus", 5, "poking", 2, "food", "poking", 1, 2);
+		public static function getPug():JoustCardWeaponOrCharacter
+		{
+			return new JoustCardWeaponOrCharacter("pug", "Pug", 3, "distracting", 2, "food", "poking", 1, 1);
+		}
+		public static function getCactus():JoustCardWeaponOrCharacter
+		{
+			return new JoustCardWeaponOrCharacter("cactus", "Cactus", 5, "poking", 2, "food", "poking", 1, 2);
+		}
 		
 		public var mc:CardWeaponOrCharacter;
 		

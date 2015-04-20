@@ -5,7 +5,10 @@ package
 
 	public class JoustCardWeaponOrMount extends JoustCardBase
 	{
-		public static var PogoStick:JoustCardWeaponOrMount = new JoustCardWeaponOrMount("pogostick", "Pogo Stick", 2, "poking", 2, 3, 1);	
+		public static function getPogoStick():JoustCardWeaponOrMount 
+		{
+			return new JoustCardWeaponOrMount("pogostick", "Pogo Stick", 2, "poking", 2, 3, 1);	
+		}
 		
 		public var mc:CardWeaponOrMount;
 		
