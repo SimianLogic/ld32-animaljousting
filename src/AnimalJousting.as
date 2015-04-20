@@ -195,6 +195,25 @@ package
 			//TODO: AI LOGIC 
 			if(CURRENT_PLAYER != 1)
 			{
+				if(playerHands[CURRENT_PLAYER].length > MAX_HAND_SIZE)
+				{
+					setTimeout(function():void
+					{
+						var which:int = Math.floor(Math.random() * playerHands[CURRENT_PLAYER].length);
+						var card:JoustCardBase = playerHands[CURRENT_PLAYER].splice(which, 1)[0];
+						discard.push(card);
+						addChild(card);
+						card.rotation = 0;
+						card.faceUp();
+						Actuate.tween(card, 0.5, { 
+							x:gameplay.discardPile.x,
+							y:gameplay.discardPile.y
+						});
+					}, 1000);
+				}
+				
+				
+				
 				setTimeout(function():void{
 					nextTurn();
 				}, 2000);
