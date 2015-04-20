@@ -15,6 +15,8 @@ package
 	public class AnimalJousting extends Sprite
 	{
 		
+		public var CURRENT_PLAYER:int = 0;
+		
 		public var gameplay:UIGameplay;
 		
 		public var startingDeck:Array = [];
@@ -55,6 +57,10 @@ package
 			gameplay = new UIGameplay();
 			addChild(gameplay);
 			
+			gameplay.turnAnnouncement.stop();
+			gameplay.turnAnnouncement.visible = false;
+			gameplay.turnAnnouncement.addEventListener("yourturn", dealNextCard);
+			
 			var i:int;
 			
 			for(i = 1; i <= MAX_HAND_SIZE; i++)
@@ -71,26 +77,42 @@ package
 			gameplay.dropCharacter.gotoAndStop(1);
 			gameplay.dropMount.gotoAndStop(1);
 			
+			
+			var enemy_names:Array = ["Pug","Cactus","Monkey"];
+			var enemy_portraits:Array = [new portrait_pug(), new portrait_cactus(), new portrait_monkey()];
 			for(i = 2; i <= 4; i++)
 			{
 				gameplay["player" + i].victoryPoints.text = "0";
 				gameplay["player" + i].handSize.text = "0";
+				gameplay["player" + i].playerName.text = enemy_names[i - 2];
+				gameplay["player" + i].portrait.addChild(enemy_portraits[i-2]);
 			}
 			gameplay.deckCount.text = "DECK: " + deck.length;
 			gameplay.discardCount.text = "DISCARD: " + discard.length;
 			
 			var delay:int = 0;
+			var delay_step:int = 250;
 			for(i = 0; i < STARTING_HAND_SIZE; i++)
 			{
-				if(delay > 0)
-				{
-					setTimeout(function():void{
-						dealCardToPlayer();	
-					}, delay);
-				}else{
+				setTimeout(function():void{
 					dealCardToPlayer();	
-				}
-				delay += 1000;
+				}, delay);
+				delay += delay_step;
+				
+				setTimeout(function():void{
+					dealCardToAI(2);	
+				}, delay);
+				delay += delay_step;
+				
+				setTimeout(function():void{
+					dealCardToAI(3);	
+				}, delay);
+				delay += delay_step;
+				
+				setTimeout(function():void{
+					dealCardToAI(4);	
+				}, delay);
+				delay += delay_step;
 			}
 			
 			gameplay.deckPile.addEventListener(MouseEvent.CLICK, function(e:MouseEvent):void{
@@ -106,6 +128,48 @@ package
 			gameplay.jouster2.visible = false;
 			
 			refreshStack();
+			
+			setTimeout(nextTurn, delay + 1000);
+		}
+		
+		public function nextTurn()
+		{
+			CURRENT_PLAYER += 1;
+			
+			if(CURRENT_PLAYER == 5)
+			{
+				CURRENT_PLAYER = 1;
+			}
+			
+			trace("CURRENT PLAYER: " + CURRENT_PLAYER);
+			var banners:Array = [null, "YOUR TURN", "PUG'S TURN", "CACTUS'S TURN", "MONKEY'S TURN"];
+			
+			gameplay.turnAnnouncement.gotoAndPlay(1);
+			gameplay.turnAnnouncement.bannerClip.bannerText.text = banners[CURRENT_PLAYER];
+			gameplay.turnAnnouncement.visible = true;
+			
+		}
+		
+		public function dealNextCard(e:Event = null)
+		{
+			setTimeout(function():void{
+				gameplay.turnAnnouncement.visible = false;	
+			}, 1000);
+			
+			if(CURRENT_PLAYER == 1)
+			{
+				dealCardToPlayer();	
+			}else{
+				dealCardToAI(CURRENT_PLAYER);
+			}
+			
+			//TODO: AI LOGIC 
+			if(CURRENT_PLAYER != 1)
+			{
+				setTimeout(function():void{
+					nextTurn();
+				}, 2000);
+			}
 		}
 		
 		public function handleSubmit(e:Event):void
@@ -201,8 +265,12 @@ package
 		
 		public function handleSkip(e:Event):void
 		{
-			//TODO: CHECK IF IT'S OUR TURN
-			trace("TODO: SKIP");
+			if(CURRENT_PLAYER != 1)
+			{
+				return;
+			}
+			
+			nextTurn();
 		}
 		
 		public function handleCardDown(e:Event):void
@@ -442,8 +510,6 @@ package
 			}, 250);
 
 		}
-		
-
 		
 		public function playerCardDealt(index:int):void
 		{
@@ -705,17 +771,65 @@ package
 		
 		public function updateLabels():void
 		{
-			var handsize:int = 0;
-			for(var i:int = 0; i < playerHands[1].length; i++)
+			var i:int;			
+			for(i = 2; i <= 4; i++)
 			{
-				if(playerHands[1][i] != null)
+				var hand_size:int = 0;
+				for(var j:int = 0; j < playerHands[i].length; j++)
 				{
-					handsize++;
+					if(playerHands[i][j] != null)
+					{
+						hand_size++;
+					}
 				}
+				trace("PLAYER " + i + " has " + hand_size + " cards");
+				gameplay["player" + i].handSize.text = hand_size.toString();
 			}
 			
 			gameplay.deckCount.text = "DECK: " + deck.length;
 			gameplay.discardCount.text = "DISCARD: " + discard.length;
+		}
+		
+		public function dealCardToAI(player:int):void
+		{
+			if(deck.length == 0)
+			{
+				trace("OUT OF CARDS");
+				return;
+			}
+			
+			trace("DEAL CARD TO PLAYER " + player);
+			
+			var which:int = Math.floor(Math.random() * deck.length);
+			var card:JoustCardBase = deck.splice(which, 1)[0];
+			gameplay.deckCount.text = "DECK: " + deck.length;
+			
+			playerHands[player].push(card);
+			
+			updateLabels();
+			
+			var target_x:Number = gameplay["player" + player].x;
+			var target_y:Number = gameplay["player" + player].y;
+			var target_duration:Number = 1.0;
+			var target_rotation:Number = 180.0;
+			
+			addChild(card);
+			card.x = gameplay.deckPile.x;
+			card.y = gameplay.deckPile.y;
+			card.scaleX = gameplay.hand1.scaleX;
+			card.scaleY = gameplay.hand1.scaleY;
+			
+			trace("TWEEN FROM " + card.x + "," + card.y + " TO " + target_x + "," + target_y);
+			
+			Actuate.tween(card, target_duration, { 
+				x:target_x,
+				y:target_y,
+				rotation:target_rotation
+			});
+			
+			setTimeout(function():void{
+				removeChild(card);
+			}, target_duration * 1000);	
 		}
 		
 		public function dealCardToPlayer():void
@@ -731,8 +845,24 @@ package
 			
 			gameplay.deckCount.text = "DECK: " + deck.length;
 			
-			var index:int = playerHands[1].length + 1;
-			playerHands[1].push(card);
+			var index:int = -1;
+			//check for empties
+			for(var i:int = 0; i < playerHands[1].length; i++)
+			{
+				if(playerHands[1][i] == null)
+				{
+					index = i + 1;
+					break;
+				}
+			}
+			
+			if(index == -1)
+			{
+				index = playerHands[1].length + 1;
+				playerHands[1].push(card);
+			}else{
+				playerHands[1][index-1] = card;
+			}
 			
 			updateLabels();			
 			
