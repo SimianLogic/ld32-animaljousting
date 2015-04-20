@@ -57,6 +57,7 @@ package
 		{
 			super();
 			
+			this.name = name;
 			this.cardName = name;
 			
 			var graphic_mc:String = "MC_" + cardName + "_card";

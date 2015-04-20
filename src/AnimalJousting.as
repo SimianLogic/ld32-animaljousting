@@ -188,15 +188,32 @@ package
 			if(CURRENT_PLAYER == 1)
 			{
 				dealCardToPlayer();	
+				
+				var move:Array = getBestMove(CURRENT_PLAYER);
+				if(move != null)
+				{
+					for(var i:int = 0; i < move.length; i++)
+					{
+						if(move[i] != null)
+						{
+							trace("PLAY " + move[i].name);
+						}
+					}
+				}
+				
 			}else{
 				dealCardToAI(CURRENT_PLAYER);
 			}
 			
-			//TODO: AI LOGIC 
 			if(CURRENT_PLAYER != 1)
 			{
+				//when do we think about our move?
+				var delay:int = 2000;
+				
 				if(playerHands[CURRENT_PLAYER].length > MAX_HAND_SIZE)
 				{
+					//discarding, think longer
+					delay += 1000;
 					setTimeout(function():void
 					{
 						var which:int = Math.floor(Math.random() * playerHands[CURRENT_PLAYER].length);
@@ -210,15 +227,303 @@ package
 							y:gameplay.discardPile.y
 						});
 					}, 1000);
+					
+					
 				}
 				
 				
 				
 				setTimeout(function():void{
-					nextTurn();
-				}, 2000);
+					takeEnemyTurn();
+				}, delay);
 			}
 		}
+		
+		public function takeEnemyTurn():void
+		{
+			var move:Array = getBestMove(CURRENT_PLAYER);
+			
+			if(move != null)
+			{
+				var delay:Number = 0;
+				var drop_targets:Array = [gameplay.dropMount, gameplay.dropCharacter, gameplay.dropWeapon, gameplay.dropBuff];
+				for(var i:int = 0; i < move.length; i++)
+				{
+					if(move[i] != null)
+					{
+						trace("PLAY " + move[i].name);
+						
+						var card:JoustCardBase = move[i];
+						
+						addChild(card);
+						card.rotation = 0;
+						card.faceUp();
+						
+						var drop_target:MovieClip = drop_targets[i];
+						
+						workingStack[i] = card;
+						for(var j:int = 0; j < playerHands[CURRENT_PLAYER].length; j++)
+						{
+							if(playerHands[CURRENT_PLAYER][j] == card)
+							{
+								playerHands[CURRENT_PLAYER][j] = null;
+							}
+						}
+						refreshStack();
+						
+						//close in on our target!
+						Actuate.tween(card, 0.25, { 
+							x:drop_target.x,
+							y:drop_target.y
+						}).delay(delay);
+						
+						delay += 0.25;
+					}
+				}
+				
+				setTimeout(resolveBattle, 1500);
+			}else{
+				nextTurn();
+			}
+		}
+		
+		public function getBestMove(player_index:int):Array
+		{
+			var valid_combinations:Array = [];
+			
+			var mounts:Array = [];
+			var characters:Array = [];
+			var weapons:Array = [];
+			var i:int;
+			
+			var hasHorse:Boolean = false;
+			for(i = 0; i < playerHands[player_index].length; i++)
+			{
+				if(playerHands[player_index][i] != null)
+				{
+					var card:JoustCardBase = playerHands[player_index][i];
+					
+					if(card is JoustCardMountCharacter)
+					{
+						hasHorse = true;
+					}
+					
+					if(card.hasMount)
+					{
+						mounts.push(card);
+					}
+					if(card.hasCharacter)
+					{
+						characters.push(card);
+					}
+					if(card.hasWeapon)
+					{
+						weapons.push(card);
+					}
+				}
+			}
+			
+			if(weapons.length == 0)
+			{
+				trace("NO WEAPONS");
+				return null;
+			}
+			if(characters.length == 0)
+			{
+				trace("NO CHARACTERS");
+				return null;
+			}
+			if(mounts.length == 0)
+			{
+				trace("NO MOUNTS");
+				return null;
+			}
+			
+			var first_pass:Array = [];
+			
+			for each(var mount_card:JoustCardBase in mounts)
+			{
+				if(mount_card is JoustCardMountCharacter)
+				{
+					first_pass.push([mount_card, null, null, null]);	
+				}else{
+					for each(var char_card:JoustCardBase in characters)
+					{
+						if(char_card is JoustCardMountCharacter)
+						{
+							continue;
+						}
+						
+						if(char_card.characterSize <= mount_card.mountSize)
+						{
+							first_pass.push([mount_card, char_card, null, null]);
+						}
+					}
+				}
+			}
+			
+			trace("FIRST PASS: " + first_pass.length + " POSSIBILITIES");
+			
+			var second_pass:Array = [];
+			for(i = 0; i < first_pass.length; i++)
+			{
+				var mount:JoustCardBase = first_pass[i][0];
+				var rider:JoustCardBase;
+				
+				if(mount is JoustCardMountCharacter)
+				{
+					rider = mount;
+				}else{
+					rider = first_pass[i][1];
+				}
+				
+				for each(var weapon_card:JoustCardBase in weapons)
+				{
+					//no dupes in case of cactus/pug/pogo
+					if(first_pass[i][0] == weapon_card || first_pass[i][1] == weapon_card)
+					{
+						continue;
+					}
+					
+					if(rider.characterIntelligence >= weapon_card.weaponIntelligence)
+					{
+						first_pass[i][2] = weapon_card;
+						second_pass.push(first_pass[i]);
+					}
+				}
+			}
+			
+			trace("SECOND PASS: " + second_pass.length + " POSSIBILITIES");
+			trace(second_pass);
+			
+			var high_score:int = -1;
+			var high_score_index:int = -1;
+			
+			
+			for(i = 0; i < second_pass.length; i++)
+			{
+				var score:int = calculateScore(second_pass[i], kingCardStack);
+				if(score > high_score)
+				{
+					high_score = score;
+					high_score_index = i;
+				}
+			}
+			
+			
+			if(high_score > 0)
+			{
+				if(kingPlayerIndex == 0)
+				{
+					return second_pass[high_score_index];	
+				}else{
+					var reigning_score:int = parseInt(gameplay.stats1.damage.text);
+					if(high_score > reigning_score)
+					{
+						return second_pass[high_score_index];
+					}else{
+						trace("GOT A MATCH, BUT NOT BETTER  " + high_score + " vs " + reigning_score);						
+						return null;
+					}
+				}
+				
+			}
+			return null;
+		}
+		
+		public function calculateScore(stack_1:Array, stack_2:Array):int
+		{
+			var mount:JoustCardBase = stack_1[0];
+			var rider:JoustCardBase = stack_1[1];
+			var weapon:JoustCardBase = stack_1[2]; 
+			//TODO: BOOST
+			
+			var enemyMount:JoustCardBase = stack_1[0];
+			var enemyRider:JoustCardBase = stack_1[1];
+			var enemyWeapon:JoustCardBase = stack_1[2];
+			
+			var power:int = 0;
+			var damageType:String = "";
+			var weakness:String = "";
+			var strength:String = "";
+			
+			var enemyPower:int = 0;
+			var enemyDamageType:String = "";
+			var enemyWeakness:String = "";
+			var enemyStrength:String = "";
+			
+			if(rider is JoustCardMountCharacter)
+			{
+				mount = rider;
+				rider = null;
+				
+				weakness = mount.characterWeakness;
+				strength = mount.characterStrength;
+			}else if(mount is JoustCardMountCharacter){
+				weakness = mount.characterWeakness;
+				strength = mount.characterStrength;
+			}
+			
+			if(enemyRider is JoustCardMountCharacter)
+			{
+				enemyMount = enemyRider;
+				enemyRider = null;
+				
+				enemyWeakness = enemyMount.characterWeakness;
+				enemyStrength = enemyMount.characterStrength;
+			}else if(enemyMount is JoustCardMountCharacter){
+				
+				enemyWeakness = enemyMount.characterWeakness;
+				enemyStrength = enemyMount.characterStrength;
+			}
+			
+			if(mount != null)
+			{
+				power += mount.mountDamage;
+			}
+			
+			if(rider != null)
+			{
+				weakness = rider.characterWeakness;
+				strength = rider.characterStrength;
+			}
+			
+			if(weapon != null)
+			{
+				power += weapon.weaponDamage;
+				damageType = weapon.weaponDamageType;
+			}
+			
+			//CHECK OUR OPPONENT
+			if(enemyWeapon != null)
+			{
+				if(enemyWeapon.weaponDamageType == weakness)
+				{
+					trace("i'm weak to the king's " + enemyWeapon.name + ": -3");
+					power -= 3;
+				}else if(enemyWeapon.weaponDamageType == strength){
+					trace("strong vs the king's " + enemyWeapon.name + ": +3");
+					power += 3;
+				}
+			}
+			
+			//IN CALCULATING THE BEST MOVE, WE ALSO NEED TO CHECK THE OPPONENT'S CHARACTER AGAINST OURS
+			if(weapon != null)
+			{
+				if(damageType == enemyWeakness)
+				{
+					trace("the king is weak to " + weapon.name + " -- effectively +3");
+					power += 3;
+				}else if(damageType == enemyStrength){
+					trace("the king is strong to " + weapon.name + " -- effectively -3");
+					power -= 3;
+				}
+			}
+			
+			return power;
+		}
+		
+		
 		
 		public function handleSubmit(e:Event):void
 		{
@@ -248,6 +553,8 @@ package
 		
 		public function resolveBattle():void
 		{
+			trace(workingStack);
+			
 			if(workingStack[3] != null)
 			{
 				discard.push(workingStack[3]);
@@ -257,8 +564,6 @@ package
 					y:gameplay.discardPile.y
 				});
 			}
-			
-			
 			
 			if(kingPlayerIndex == 0)
 			{
@@ -295,13 +600,16 @@ package
 				gameplay.winnerAnnouncement.bannerClip.bannerText.text = "CHALLENGER WINS!";
 				gameplay.winnerAnnouncement.visible = true;
 				
+				
+				trace(kingCardStack);
+				trace(kingStack);
 				for(i = 0; i < kingCardStack.length; i++)
 				{
 					if(kingCardStack[i] != null)
 					{
 						addChild(kingCardStack[i]);
-						kingCardStack[i].x = kingStack[i].x;
-						kingCardStack[i].y = kingStack[i].y;						
+						kingCardStack[i].x = gameplay.jouster1.x;
+						kingCardStack[i].y = gameplay.jouster1.y;						
 						
 						Actuate.tween(kingCardStack[i], 0.5, { 
 							x:gameplay.discardPile.x,
@@ -316,8 +624,11 @@ package
 				kingCardStack = workingStack.concat();
 				for(i = 0; i < 3; i++)
 				{
-					workingStack[i].parent.removeChild(workingStack[i]);
-					workingStack[i] = null;
+					if(workingStack[i] != null)
+					{
+						workingStack[i].parent.removeChild(workingStack[i]);
+						workingStack[i] = null;	
+					}
 				}
 				
 			}else{
@@ -775,10 +1086,21 @@ package
 			var rider:JoustCardBase = kingCardStack[1];
 			var weapon:JoustCardBase = kingCardStack[2];
 			
+			var power:int = 0;
+			var damageType:String = "";
+			var weakness:String = "";
+			var strength:String = "";
+			
 			if(rider is JoustCardMountCharacter)
 			{
 				mount = rider;
 				rider = null;
+				
+				weakness = mount.characterWeakness;
+				strength = mount.characterStrength;
+			}else if(mount is JoustCardMountCharacter){
+				weakness = mount.characterWeakness;
+				strength = mount.characterStrength;
 			}
 			
 			for(var i:int = 0; i < 3; i++)
@@ -795,11 +1117,6 @@ package
 			var weapon_clip:MovieClip;
 			
 			var klass:Class;
-			
-			var power:int = 0;
-			var damageType:String = "";
-			var weakness:String = "";
-			var strength:String = "";
 						
 			if(mount != null)
 			{
@@ -878,6 +1195,8 @@ package
 				trace("CHALLENGER HAS NO WEAPON");
 			}
 			
+			trace("WEAKNESS & STRENGTH: " + weakness + "," + strength);
+			
 			gameplay.stats1.damage.text = power;
 			gameplay.stats1.damageDistraction.visible = (damageType == JoustCardWeapon.DAMAGE_DISTRACTING);
 			gameplay.stats1.damagePoking.visible = (damageType == JoustCardWeapon.DAMAGE_POKING);
@@ -899,11 +1218,21 @@ package
 			var rider:JoustCardBase = challengerCardStack[1];
 			var weapon:JoustCardBase = challengerCardStack[2];
 			
+			
+			var power:int = 0;
+			var damageType:String = "";
+			var weakness:String = "";
+			var strength:String = "";
+			
 			if(rider is JoustCardMountCharacter)
 			{
-				trace("USE THE RIDER AS THE MOUNT");
 				mount = rider;
 				rider = null;
+				weakness = mount.characterWeakness;
+				strength = mount.characterStrength;
+			}else if(mount is JoustCardMountCharacter){
+				weakness = mount.characterWeakness;
+				strength = mount.characterStrength;
 			}
 			
 			for(var i:int = 0; i < 3; i++)
@@ -920,11 +1249,6 @@ package
 			var weapon_clip:MovieClip;
 			
 			var klass:Class;
-			
-			var power:int = 0;
-			var damageType:String = "";
-			var weakness:String = "";
-			var strength:String = "";
 			
 			if(mount != null)
 			{
@@ -1034,7 +1358,6 @@ package
 						hand_size++;
 					}
 				}
-				trace("PLAYER " + i + " has " + hand_size + " cards");
 				gameplay["player" + i].handSize.text = hand_size.toString();
 			}
 			
@@ -1056,7 +1379,23 @@ package
 			var card:JoustCardBase = deck.splice(which, 1)[0];
 			gameplay.deckCount.text = "DECK: " + deck.length;
 			
-			playerHands[player].push(card);
+			var empty:int = -1;
+			//check for empties
+			for(var i:int = 0; i < playerHands[player].length; i++)
+			{
+				if(playerHands[player][i] == null)
+				{
+					empty = i;
+					break;
+				}
+			}
+			
+			if(empty == -1)
+			{
+				playerHands[player].push(card);
+			}else{
+				playerHands[player][empty] = card;
+			}
 			
 			updateLabels();
 			

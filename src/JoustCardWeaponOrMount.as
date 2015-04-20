@@ -56,7 +56,7 @@ package
 			mc.brainBoxes.fill3.alpha = !(intelligence <= 3);
 			
 			//MOUNT SIDE
-			mc.damage.text = mount_damage.toString();
+			mc.damage2.text = mount_damage.toString();
 			
 			mc.sizeBoxes.fill1.alpha = 0;  //1,2,3
 			mc.sizeBoxes.fill2.alpha = !(size > 1);  //1,2
