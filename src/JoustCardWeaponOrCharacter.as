@@ -22,6 +22,11 @@ package
 			return "MC_" + cardName + "_weapon";
 		}
 		
+		override public function copy():JoustCardBase
+		{
+			return new JoustCardWeaponOrCharacter(cardName, mc.nameLabel.text, weaponDamage, weaponDamageType, weaponIntelligence, characterWeakness, characterStrength, characterIntelligence, characterSize);
+		}
+		
 		public function JoustCardWeaponOrCharacter(name:String, title:String, weapon_damage:int, weapon_damageType:String, weapon_intelligence:int, weakness:String, strength:String, character_intelligence:int, size:int)
 		{
 			hasWeapon = true;
@@ -74,5 +79,7 @@ package
 			mc.sizeBoxes.fill2.alpha = !(size == 2);
 			mc.sizeBoxes.fill3.alpha = !(size == 3);
 		}
+		
+		
 	}
 }

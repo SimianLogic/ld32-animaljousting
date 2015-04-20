@@ -92,5 +92,11 @@ package
 			
 			cardBack.visible = false;	
 		}
+		
+		
+		public function copy():JoustCardBase
+		{
+			throw new Error("OVERRIDE ME");
+		}
 	}
 }

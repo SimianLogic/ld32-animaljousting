@@ -18,6 +18,7 @@ package
 		public var CURRENT_PLAYER:int = 0;
 		
 		public var gameplay:UIGameplay;
+		public var discardPop:UIDiscard;
 		
 		public var startingDeck:Array = [];
 		public var deck:Array = [];
@@ -25,6 +26,8 @@ package
 		
 		//1-indexed
 		public var handSlots:Array = [null];
+		public var discardSlots:Array = [null];
+		
 		public var playerHands:Array = [null, [],[],[],[]];
 		public var playerScores:Array = [null, 0, 0, 0, 0];
 		
@@ -54,6 +57,46 @@ package
 				(card as JoustCardBase).faceDown();
 			}
 			
+			setupGameplay();			
+			setupDiscard();
+			
+			var i:int;
+			
+			var delay:int = 0;
+			var delay_step:int = 250;
+			for(i = 0; i < STARTING_HAND_SIZE; i++)
+			{
+				setTimeout(function():void{
+					dealCardToPlayer();	
+				}, delay);
+				delay += delay_step;
+				
+				setTimeout(function():void{
+					dealCardToAI(2);	
+				}, delay);
+				delay += delay_step;
+				
+				setTimeout(function():void{
+					dealCardToAI(3);	
+				}, delay);
+				delay += delay_step;
+				
+				setTimeout(function():void{
+					dealCardToAI(4);	
+				}, delay);
+				delay += delay_step;
+			}
+			
+			//DEBUG -- GIMME MORE CARDS
+			gameplay.deckPile.addEventListener(MouseEvent.CLICK, function(e:MouseEvent):void{
+				dealCardToPlayer();
+			});
+			
+			setTimeout(nextTurn, delay + 1000);
+		}
+		
+		public function setupGameplay():void
+		{
 			gameplay = new UIGameplay();
 			addChild(gameplay);
 			
@@ -82,7 +125,6 @@ package
 			gameplay.dropCharacter.gotoAndStop(1);
 			gameplay.dropMount.gotoAndStop(1);
 			
-			
 			var enemy_names:Array = ["Pug","Cactus","Monkey"];
 			var enemy_portraits:Array = [new portrait_pug(), new portrait_cactus(), new portrait_monkey()];
 			for(i = 2; i <= 4; i++)
@@ -95,44 +137,26 @@ package
 			gameplay.deckCount.text = "DECK: " + deck.length;
 			gameplay.discardCount.text = "DISCARD: " + discard.length;
 			
-			var delay:int = 0;
-			var delay_step:int = 250;
-			for(i = 0; i < STARTING_HAND_SIZE; i++)
-			{
-				setTimeout(function():void{
-					dealCardToPlayer();	
-				}, delay);
-				delay += delay_step;
-				
-				setTimeout(function():void{
-					dealCardToAI(2);	
-				}, delay);
-				delay += delay_step;
-				
-				setTimeout(function():void{
-					dealCardToAI(3);	
-				}, delay);
-				delay += delay_step;
-				
-				setTimeout(function():void{
-					dealCardToAI(4);	
-				}, delay);
-				delay += delay_step;
-			}
-			
-			gameplay.deckPile.addEventListener(MouseEvent.CLICK, function(e:MouseEvent):void{
-				dealCardToPlayer();
-			});
-			
 			gameplay.trade.addEventListener(MouseEvent.CLICK, handleTrade);
 			gameplay.skip.addEventListener(MouseEvent.CLICK, handleSkip);
 			gameplay.submit.addEventListener(MouseEvent.CLICK, handleSubmit);
 			
-			
 			gameplay.jouster1.visible = false;
 			gameplay.jouster2.visible = false;
+		}
+		
+		public function setupDiscard():void
+		{
+			discardPop = new UIDiscard();
 			
-			setTimeout(nextTurn, delay + 1000);
+			for(var i:int = 1; i <= 8; i++)
+			{
+				var hand:MCButton= new MCButton(discardPop["hand" + i]);
+				hand.isEnabled = false;
+				hand.name = i.toString();
+				hand.addEventListener("mc_down", discardACard);
+				discardSlots.push(hand);
+			}
 		}
 		
 		public function nextTurn():void
@@ -1068,19 +1092,6 @@ package
 			var target_y:Number;
 			var target_rotation:Number;
 			var target_duration:Number = 1.0;
-						
-			if(index <= MAX_HAND_SIZE)
-			{
-				target_x = handSlots[index].x;
-				target_y = handSlots[index].y;
-				target_duration = 1.0;
-				target_rotation = 180.0;
-			}else{
-				target_x = gameplay.deckPile.x;
-				target_y = gameplay.deckPile.y;
-				target_duration = 0.0;	
-				target_rotation = 0;
-			}
 			
 			addChild(card);
 			card.x = gameplay.deckPile.x;
@@ -1088,12 +1099,58 @@ package
 			card.scaleX = gameplay.hand1.scaleX;
 			card.scaleY = gameplay.hand1.scaleY;
 			
-			Actuate.tween(card, target_duration, { 
-				x:target_x,
-				y:target_y,
-				rotation:target_rotation
-			}).onComplete (playerCardDealt,index);
+			if(index <= MAX_HAND_SIZE)
+			{
+				target_x = handSlots[index].x;
+				target_y = handSlots[index].y;
+				target_duration = 1.0;
+				target_rotation = 180.0;
+				
+				Actuate.tween(card, target_duration, { 
+					x:target_x,
+					y:target_y,
+					rotation:target_rotation
+				}).onComplete (playerCardDealt,index);
+			}else{
+				card.faceUp();
+				handleDiscard();
+			}
 		}
 		
+		
+		public function handleDiscard():void
+		{
+			addChild(discardPop);
+			
+			for(var i:int = 0; i < playerHands[1].length; i++)
+			{
+				discardPop["hand" + (i+1)].holder.addChild(playerHands[1][i].copy());
+				discardSlots[i+1].isEnabled = true;
+			}
+			
+		}
+		
+		public function discardACard(event:Event):void
+		{
+			removeChild(discardPop);
+			
+			var index:int = parseInt(event.currentTarget.name);
+			
+			//card 8 is the easy case!
+			if(index == 8)
+			{
+				var card:JoustCardBase = playerHands[1][index-1];
+				playerHands[1][index-1] = null;
+				discard.push(card);
+				
+				Actuate.tween(card, 0.5, { 
+					x:gameplay.discardPile.x,
+					y:gameplay.discardPile.y
+				});
+				return;
+			}
+			
+			
+		}
 	}
 }

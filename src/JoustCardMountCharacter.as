@@ -51,5 +51,10 @@ package
 			mc.brainBoxes.fill3.alpha = !(intelligence == 3);
 			
 		}
+		
+		override public function copy():JoustCardBase
+		{
+			return new JoustCardMountCharacter(cardName, mc.nameLabel.text, characterWeakness, characterStrength, characterIntelligence, mountDamage);
+		}
 	}
 }

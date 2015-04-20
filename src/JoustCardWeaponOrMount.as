@@ -17,6 +17,11 @@ package
 			return "MC_" + cardName + "_weapon";
 		}
 		
+		override public function copy():JoustCardBase
+		{
+			return new JoustCardWeaponOrMount(cardName, mc.nameLabel.text, weaponDamage, weaponDamageType, weaponIntelligence, mountSize, mountDamage);
+		}
+		
 		public function JoustCardWeaponOrMount(name:String, title:String, weapon_damage:int, weapon_damageType:String, intelligence:int, size:int, mount_damage:int)
 		{
 			hasMount = true;

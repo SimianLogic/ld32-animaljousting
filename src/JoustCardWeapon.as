@@ -60,5 +60,10 @@ package
 			mc.brainBoxes.fill2.alpha = !(intelligence <= 2);
 			mc.brainBoxes.fill3.alpha = !(intelligence <= 3);
 		}
+		
+		override public function copy():JoustCardBase
+		{
+			return new JoustCardWeapon(cardName, mc.nameLabel.text, weaponDamage, weaponDamageType, weaponIntelligence);
+		}
 	}
 }

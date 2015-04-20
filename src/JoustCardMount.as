@@ -54,5 +54,10 @@ package
 			mc.sizeBoxes.fill3.alpha = !(size > 2);  //3
 			
 		}
+		
+		override public function copy():JoustCardBase
+		{
+			return new JoustCardMount(cardName, mc.nameLabel.text, mountSize, mountDamage); 
+		}
 	}
 }

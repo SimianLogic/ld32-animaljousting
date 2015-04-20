@@ -30,8 +30,6 @@ package
 		
 		public var mc:CardCharacter;
 		
-		
-		
 		public function JoustCardCharacter(name:String, title:String, weakness:String, strength:String, size:int, intelligence:int)
 		{
 			hasCharacter = true;
@@ -65,6 +63,11 @@ package
 			mc.sizeBoxes.fill1.alpha = !(size == 1);
 			mc.sizeBoxes.fill2.alpha = !(size == 2);
 			mc.sizeBoxes.fill3.alpha = !(size == 3);
+		}
+		
+		override public function copy():JoustCardBase
+		{
+			return new JoustCardCharacter(cardName, mc.nameLabel.text, characterWeakness, characterStrength, characterSize, characterIntelligence);
 		}
 	}
 }
