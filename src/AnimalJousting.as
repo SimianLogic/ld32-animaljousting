@@ -1151,6 +1151,34 @@ package
 			}
 			
 			
+			var discarded_card:JoustCardBase = playerHands[1][index - 1] as JoustCardBase;
+			addChild(discarded_card);
+			
+			discarded_card.x = handSlots[index].x;
+			discarded_card.y = handSlots[index].y;
+						
+			discarded_card.scaleX = gameplay.hand1.scaleX;
+			discarded_card.scaleY = gameplay.hand1.scaleY;
+			
+			var new_card:JoustCardBase = playerHands[1][playerHands[1].length - 1];
+			playerHands[1][index-1] = new_card;
+			playerHands[1][playerHands[1].length - 1] = null;
+			discard.push(discarded_card);
+			
+			Actuate.tween(discarded_card, 0.5, { 
+				x:gameplay.discardPile.x,
+				y:gameplay.discardPile.y
+			});
+					
+			var target_x:Number = handSlots[index].x;
+			var target_y:Number = handSlots[index].y;
+			var target_duration:Number = 1.0
+				
+			Actuate.tween(new_card, target_duration, { 
+				x:target_x,
+				y:target_y
+			}).onComplete (playerCardDealt,index);
+			
 		}
 	}
 }
