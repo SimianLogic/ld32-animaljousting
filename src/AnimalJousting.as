@@ -61,6 +61,10 @@ package
 			gameplay.turnAnnouncement.visible = false;
 			gameplay.turnAnnouncement.addEventListener("yourturn", dealNextCard);
 			
+			gameplay.winnerAnnouncement.stop();
+			gameplay.winnerAnnouncement.visible = false;
+			gameplay.winnerAnnouncement.addEventListener("yourturn", cleanUpBattle);
+			
 			var i:int;
 			
 			for(i = 1; i <= MAX_HAND_SIZE; i++)
@@ -132,7 +136,7 @@ package
 			setTimeout(nextTurn, delay + 1000);
 		}
 		
-		public function nextTurn()
+		public function nextTurn():void
 		{
 			CURRENT_PLAYER += 1;
 			
@@ -141,7 +145,6 @@ package
 				CURRENT_PLAYER = 1;
 			}
 			
-			trace("CURRENT PLAYER: " + CURRENT_PLAYER);
 			var banners:Array = [null, "YOUR TURN", "PUG'S TURN", "CACTUS'S TURN", "MONKEY'S TURN"];
 			
 			addChild(gameplay.turnAnnouncement);
@@ -151,7 +154,7 @@ package
 			
 		}
 		
-		public function dealNextCard(e:Event = null)
+		public function dealNextCard(e:Event = null):void
 		{
 			setTimeout(function():void{
 				gameplay.turnAnnouncement.visible = false;	
@@ -201,13 +204,85 @@ package
 		{
 			if(kingPlayerIndex == 0)
 			{
-				trace("PLAYER 1 IS NOW KING!");
-				kingPlayerIndex = CURRENT_PLAYER;
+				newSheriffInTown();
+				
+				addChild(gameplay.winnerAnnouncement);
+				gameplay.winnerAnnouncement.gotoAndPlay(1);
+				gameplay.winnerAnnouncement.bannerClip.bannerText.text = "NEW KING OF THE HILL";
+				gameplay.winnerAnnouncement.visible = true;
+				
+				return;
 			}
 			
+			var i:int;
 			
+			var king_score:int = parseInt(gameplay.stats1.damage.text);
+			var challenger_score:int = parseInt(gameplay.stats2.damage.text);
 			
-			nextTurn();
+			if(challenger_score > king_score)
+			{
+				newSheriffInTown();
+				
+				addChild(gameplay.winnerAnnouncement);
+				gameplay.winnerAnnouncement.gotoAndPlay(1);
+				gameplay.winnerAnnouncement.bannerClip.bannerText.text = "CHALLENGER WINS!";
+				gameplay.winnerAnnouncement.visible = true;
+				
+				for(i = 0; i < kingCardStack.length; i++)
+				{
+					if(kingCardStack[i] != null)
+					{
+						addChild(kingCardStack[i]);
+						kingCardStack[i].x = kingStack[i].x;
+						kingCardStack[i].y = kingStack[i].y;						
+						
+						Actuate.tween(kingCardStack[i], 0.5, { 
+							x:gameplay.discardPile.x,
+							y:gameplay.discardPile.y
+						});
+						
+						discard.push(kingCardStack[i]);
+						kingCardStack[i] = null;
+					}
+				}
+				
+			}else{
+				addChild(gameplay.winnerAnnouncement);
+				gameplay.winnerAnnouncement.gotoAndPlay(1);
+				gameplay.winnerAnnouncement.bannerClip.bannerText.text = "KING WINS!";
+				gameplay.winnerAnnouncement.visible = true;
+				
+				for(i = 0; i < workingStack.length; i++)
+				{
+					if(workingStack[i] != null)
+					{
+						Actuate.tween(workingStack[i], 0.5, { 
+							x:gameplay.discardPile.x,
+							y:gameplay.discardPile.y
+						});
+						
+						discard.push(workingStack[i]);
+						workingStack[i] = null;
+					}
+				}
+			}
+			
+		}
+		
+		public function cleanUpBattle(e:Event = null):void
+		{
+			setTimeout(function():void {
+				gameplay.winnerAnnouncement.visible = false;
+				nextTurn();
+			}, 1000);
+		}
+		
+		public function newSheriffInTown():void
+		{
+			playerScores[CURRENT_PLAYER] += 1;
+			updateLabels();
+			
+			kingPlayerIndex = CURRENT_PLAYER;	
 		}
 		
 		public function handleTrade(e:Event):void
