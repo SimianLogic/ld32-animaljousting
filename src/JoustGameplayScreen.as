@@ -158,7 +158,7 @@ package
 		
 		public function toggleHelp(e:Event):void
 		{
-			AnimalJousting.buttonPressed();
+			AnimalJousting.buttonSound();
 			if(help == null)
 			{
 				help = new UIHelp();
@@ -169,28 +169,30 @@ package
 		
 		public function toggleHelpOff(e:Event):void
 		{
-			AnimalJousting.buttonPressed();
+			AnimalJousting.buttonSound();
 			stage.removeChild(help);
 		}
 		
 		public function toggleMusic(e:Event):void
 		{
-			AnimalJousting.buttonPressed();
+			AnimalJousting.buttonSound();
 			trace(e.currentTarget.name);
 			if(e.currentTarget.name == "music_off")
 			{
 				gameplay.music_off.visible = false;
 				gameplay.music_on.visible = true;
 				AnimalJousting.musicEnabled = true;
+				AnimalJousting.playMusic();
 			}else{
 				gameplay.music_off.visible = true;
 				gameplay.music_on.visible = false;
-				AnimalJousting.musicEnabled = false;	
+				AnimalJousting.musicEnabled = false;
+				AnimalJousting.stopMusic();
 			}
 		}
 		public function toggleSound(e:Event):void
 		{
-			AnimalJousting.buttonPressed();
+			AnimalJousting.buttonSound();
 			trace(e.currentTarget.name);
 			if(e.currentTarget.name == "sound_off")
 			{
@@ -231,6 +233,13 @@ package
 			
 			var banners:Array = [null, "YOUR TURN", "PUG'S TURN", "CACTUS'S TURN", "MONKEY'S TURN"];
 			
+			if(CURRENT_PLAYER == kingPlayerIndex)
+			{
+				AnimalJousting.newKingSound();
+				playerScores[CURRENT_PLAYER] += 1;
+				updateLabels();
+			}
+			
 			addChild(gameplay.turnAnnouncement);
 			gameplay.turnAnnouncement.gotoAndPlay(1);
 			gameplay.turnAnnouncement.bannerClip.bannerText.text = banners[CURRENT_PLAYER];
@@ -247,19 +256,6 @@ package
 			if(CURRENT_PLAYER == 1)
 			{
 				dealCardToPlayer();	
-				
-				var move:Array = getBestMove(CURRENT_PLAYER);
-				if(move != null)
-				{
-					for(var i:int = 0; i < move.length; i++)
-					{
-						if(move[i] != null)
-						{
-							trace("PLAY " + move[i].name);
-						}
-					}
-				}
-				
 			}else{
 				dealCardToAI(CURRENT_PLAYER);
 			}
@@ -586,7 +582,7 @@ package
 		
 		public function handleSubmit(e:Event):void
 		{
-			AnimalJousting.buttonPressed();
+			AnimalJousting.buttonSound();
 			
 			if(CURRENT_PLAYER != 1)
 			{
@@ -734,12 +730,15 @@ package
 			playerScores[CURRENT_PLAYER] += 1;
 			updateLabels();
 			
-			kingPlayerIndex = CURRENT_PLAYER;	
+			kingPlayerIndex = CURRENT_PLAYER;
+			AnimalJousting.newKingSound();
+			
+			//TODO: MOVE THE CROWN
 		}
 		
 		public function handleTrade(e:Event):void
 		{
-			AnimalJousting.buttonPressed();
+			AnimalJousting.buttonSound();
 			if(CURRENT_PLAYER != 1) return;
 			
 			var got_one:Boolean = false;
@@ -811,7 +810,7 @@ package
 		
 		public function handleSkip(e:Event):void
 		{
-			AnimalJousting.buttonPressed();
+			AnimalJousting.buttonSound();
 			
 			if(CURRENT_PLAYER != 1)
 			{

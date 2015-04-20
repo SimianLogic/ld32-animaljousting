@@ -8,6 +8,7 @@ package
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.media.Sound;
+	import flash.media.SoundChannel;
 	import flash.utils.getDefinitionByName;
 	import flash.utils.setTimeout;
 	
@@ -30,27 +31,84 @@ package
 			addChild(splash);
 			
 			splash.playButton.addEventListener(MouseEvent.CLICK, playGame);
-
+			playMusic();
 		}
 		
-		public static var buttonSound:sfx_pop;
-		public static function buttonPressed():void
+		public static var button:sfx_pop;
+		public static function buttonSound():void
 		{
-			if(buttonSound == null)
+			if(button == null)
 			{
-				buttonSound = new sfx_pop();
+				button = new sfx_pop();
 			}
 			
 			if(soundEnabled)
 			{
-				(buttonSound as Sound).play();	
+				(button as Sound).play();	
 			}
+		}
+		
+		public static var motor:sfx_motorRumble;
+		public static function motorSound():void
+		{
+			if(motor == null)
+			{
+				motor = new sfx_motorRumble();
+			}
+			
+			if(soundEnabled)
+			{
+				(motor as Sound).play();	
+			}
+		}
+		
+		public static var newKing:sfx_hornBlow;
+		public static function newKingSound():void
+		{
+			if(newKing == null)
+			{
+				newKing = new sfx_hornBlow();
+			}
+			
+			if(soundEnabled)
+			{
+				(newKing as Sound).play();	
+			}
+		}
+		
+		private static var musicSounds:Array;
+		private static var musicChannel:SoundChannel;
+		public static function playMusic():void
+		{
+			if(musicSounds == null)
+			{
+				musicSounds = [new Loop1Court(), new Loop2Court(), new Loop3Court()];
+			}
+			
+			var which:int = Math.floor(Math.random() * musicSounds.length);
+			musicChannel = musicSounds[which].play(0);
+			musicChannel.addEventListener(Event.SOUND_COMPLETE, musicLoop);			
+		}
+		
+		//  this is called when the sound channel completes.
+		public static function musicLoop(e:Event):void
+		{
+			e.currentTarget.removeEventListener(Event.SOUND_COMPLETE, musicLoop);
+			if(musicEnabled)
+			{
+				playMusic();	
+			}
+		}
+		
+		public static function stopMusic():void
+		{
+			musicChannel.stop();	
 		}
 		
 		public function playGame(e:Event):void
 		{
 			
-			AnimalJousting.buttonPressed();
+			AnimalJousting.buttonSound();
 			stage.color = 0xffffff;
 			
 			game = new JoustGameplayScreen();
