@@ -644,12 +644,13 @@ package
 			
 			if(workingStack[3] != null)
 			{
+				workingStack[3].removeEventListener(MouseEvent.CLICK, workingStack[3].goHome);
 				discard.push(workingStack[3]);
-				workingStack[3] = null;
 				Actuate.tween(workingStack[3], 0.5, { 
 					x:gameplay.discardPile.x,
 					y:gameplay.discardPile.y
 				});
+				workingStack[3] = null;
 			}
 			
 			if(kingPlayerIndex == 0)
