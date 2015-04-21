@@ -20,5 +20,10 @@
 			<type>2</type>
 			<location>/Users/will/Desktop</location>
 		</link>
+		<link>
+			<name>bin-release1</name>
+			<type>2</type>
+			<location>/Users/will/Desktop/animaljousting</location>
+		</link>
 	</linkedResources>
 </projectDescription>

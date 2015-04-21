@@ -32,7 +32,7 @@ package
 		
 		public static var STARTING_HAND_SIZE:int = 4;
 		public static var MAX_HAND_SIZE:int = 7;
-		public static var VICTORY_SCORE:int = 10;
+		public static var VICTORY_SCORE:int = 7;
 		
 		public var workingStack:Array = [null,null,null,null];
 		
@@ -483,17 +483,20 @@ package
 			{
 				if(kingPlayerIndex == 0)
 				{
+					trace("NO KING, TAKE OVER!");
 					return second_pass[high_score_index];	
 				}else{
+					
 					var reigning_score:int = parseInt(gameplay.stats1.damage.text);
-					if(high_score > reigning_score)
+					trace("REIGNING SCORE: " + reigning_score + " vs CHALLENGER " + high_score);
+					if(high_score >= reigning_score)
 					{
 						return second_pass[high_score_index];
 					}else{
 						
-						
 						for(i = 0; i < buffs.length; i++)
 						{
+							trace("GOT A BUFF WITH +" + buffs[i].attackBuff);
 							if(high_score + buffs[i].attackBuff > reigning_score)
 							{
 								second_pass[high_score_index][3] = buffs[i];
@@ -515,12 +518,29 @@ package
 		{
 			var mount:JoustCardBase = stack_1[0];
 			var rider:JoustCardBase = stack_1[1];
-			var weapon:JoustCardBase = stack_1[2]; 
+			var weapon:JoustCardBase = stack_1[2];
+			
+			trace("TESTING " + (mount ? mount.name : "null") + " | " 
+				+ (rider ? rider.name : "null") + " | " 
+				+ (weapon ? weapon.name : "null")); 
+			
+			trace("TESTING " + (mount ? mount.mountDamage : "null") + " | " 
+				+ (rider ? (rider.characterWeakness + "+" + rider.characterStrength) : "null") + " | " 
+				+ (weapon ? weapon.weaponDamage : "null")); 
+				
 			//TODO: BOOST
 			
-			var enemyMount:JoustCardBase = stack_1[0];
-			var enemyRider:JoustCardBase = stack_1[1];
-			var enemyWeapon:JoustCardBase = stack_1[2];
+			var enemyMount:JoustCardBase = stack_2[0];
+			var enemyRider:JoustCardBase = stack_2[1];
+			var enemyWeapon:JoustCardBase = stack_2[2];
+			
+			trace("ENEMY IS " + (enemyMount ? enemyMount.name : "null") + " | " 
+				+ (enemyRider ? enemyRider.name : "null") + " | " 
+				+ (enemyWeapon ? enemyWeapon.name : "null")); 
+			
+			trace("ENEMY IS  " + (enemyMount ? enemyMount.mountDamage : "null") + " | " 
+				+ (enemyRider ? (enemyRider.characterWeakness + "+" + enemyRider.characterStrength) : "null") + " | " 
+				+ (enemyWeapon ? enemyWeapon.weaponDamage : "null")); 
 			
 			var power:int = 0;
 			var damageType:String = "";
@@ -574,6 +594,12 @@ package
 				damageType = weapon.weaponDamageType;
 			}
 			
+			if(enemyRider != null)
+			{
+				enemyWeakness = enemyRider.characterWeakness;
+				enemyStrength = enemyRider.characterStrength;
+			}
+			
 			//CHECK OUR OPPONENT
 			if(enemyWeapon != null)
 			{
@@ -590,6 +616,8 @@ package
 			//IN CALCULATING THE BEST MOVE, WE ALSO NEED TO CHECK THE OPPONENT'S CHARACTER AGAINST OURS
 			if(weapon != null)
 			{
+				trace("comparing " + damageType + " to " + enemyWeakness);
+				trace("comparing " + damageType + " to " + enemyStrength);
 				if(damageType == enemyWeakness)
 				{
 					trace("the king is weak to " + weapon.name + " -- effectively +3");
@@ -644,7 +672,11 @@ package
 			
 			if(workingStack[3] != null)
 			{
-				workingStack[3].removeEventListener(MouseEvent.CLICK, workingStack[3].goHome);
+				if(workingStack[3].goHome != null && workingStack[3].hasEventListener(MouseEvent.CLICK))
+				{
+					workingStack[3].removeEventListener(MouseEvent.CLICK, workingStack[3].goHome);		
+				}
+				
 				discard.push(workingStack[3]);
 				Actuate.tween(workingStack[3], 0.5, { 
 					x:gameplay.discardPile.x,
@@ -831,9 +863,11 @@ package
 						dealCardToPlayer();	
 					}
 					delay += 1000;
-				}	
+				}
+				
+				setTimeout(nextTurn, delay + 500);
+				
 			}, 500);
-			
 			
 		}
 		
@@ -951,8 +985,6 @@ package
 			var discard_intersect:Rectangle = activeCard.getRect(stage).intersection(gameplay.discardPile.getRect(stage));
 			var discard_area:Number = discard_intersect.width * discard_intersect.height;
 			
-			trace("DISCARD AREA: " + discard_area);
-			
 			var keeper:int = -1;
 			var targets:Array = [gameplay.dropMount, gameplay.dropCharacter, gameplay.dropWeapon, gameplay.dropBuff, gameplay.discardPile];
 			var eligible:Array = [activeCard.hasMount, activeCard.hasCharacter, activeCard.hasWeapon, activeCard.hasBuff, activeCard.hasCardDraw];
@@ -1050,7 +1082,6 @@ package
 			
 			if(activeDrop == null)
 			{
-				trace("NO ACTIVE DROP, GO HOME");
 				Actuate.tween(activeCard, 1, { 
 					x:activeHand.x,
 					y:activeHand.y
@@ -1245,6 +1276,7 @@ package
 			{
 				if(kingStack[i] != null)
 				{
+					kingStack[i].stop();
 					kingStack[i].parent.removeChild(kingStack[i]);
 					kingStack[i] = null;
 				}	
@@ -1334,11 +1366,7 @@ package
 				}else{
 					trace("King is unphased by challenger attack!");
 				}
-			}else{
-				trace("CHALLENGER HAS NO WEAPON");
 			}
-			
-			trace("WEAKNESS & STRENGTH: " + weakness + "," + strength);
 			
 			gameplay.stats1.damage.text = power;
 			gameplay.stats1.damageDistraction.visible = (damageType == JoustCardWeapon.DAMAGE_DISTRACTING);
@@ -1383,6 +1411,7 @@ package
 			{
 				if(challengerStack[i] != null)
 				{
+					challengerStack[i].stop();
 					challengerStack[i].parent.removeChild(challengerStack[i]);
 					challengerStack[i] = null;
 				}	
@@ -1534,20 +1563,12 @@ package
 			gameplay.deckCount.text = "DECK: " + deck.length;
 		}
 		
-		public function showVictory():void
-		{
-			
-		}
-		
 		public function dealCardToAI(player:int):void
 		{
 			if(deck.length == 0)
 			{
-				trace("OUT OF CARDS");
 				reshuffle();
 			}
-			
-			trace("DEAL CARD TO PLAYER " + player);
 			
 			var which:int = Math.floor(Math.random() * deck.length);
 			var card:JoustCardBase = deck.splice(which, 1)[0];
@@ -1583,8 +1604,6 @@ package
 			card.y = gameplay.deckPile.y;
 			card.scaleX = gameplay.hand1.scaleX;
 			card.scaleY = gameplay.hand1.scaleY;
-			
-			trace("TWEEN FROM " + card.x + "," + card.y + " TO " + target_x + "," + target_y);
 			
 			Actuate.tween(card, target_duration, { 
 				x:target_x,
